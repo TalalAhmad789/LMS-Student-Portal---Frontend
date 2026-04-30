@@ -1,0 +1,155 @@
+import { useState, useEffect } from "react";
+import {
+  FaHome,
+  FaUserGraduate,
+  FaChalkboardTeacher,
+  FaUserFriends,
+  FaWpforms,
+  FaBookOpen,
+  FaClock,
+  FaBookReader,
+  FaComments,
+  FaEnvelope,
+  FaShieldAlt,
+  FaLaptop,
+  FaSignOutAlt,
+  FaClipboardList,
+  FaUsersCog,
+} from "react-icons/fa";
+import axios from "axios";
+import {
+  MdGroups,
+  MdOutlineAssignment,
+  MdOutlineClass,
+  MdOutlineMail,
+  MdEventNote,
+} from "react-icons/md";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+
+export default function Sidebar({ studentInfo }) {
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const currentRoute = location.pathname.split("/")[1];
+
+
+  // ---- MENU ITEMS ----
+  const menuItems = {
+    student: [
+      { name: "Dashboard", icon: <FaHome size={18} />, path: "/student/dashboard" },
+      { name: "Academics", icon: <FaUserGraduate size={18} />, path: `/student/academics?semester=${studentInfo?.semester}` },
+      { name: "Applications", icon: <FaWpforms size={18} />, path: "/student/applications" },
+      { name: "Timetable", icon: <FaClock size={18} />, path: "/student/timetable" },
+      { name: "Learning", icon: <FaBookReader size={18} />, path: "/student/learning" },
+      { name: "Feedback", icon: <FaComments size={18} />, path: "/student/feedback" },
+      { name: "Mailbox", icon: <FaEnvelope size={18} />, path: "/student/mailbox" },
+      { name: "Security", icon: <FaShieldAlt size={18} />, path: "/student/security" },
+      { name: "Access & Devices", icon: <FaLaptop size={18} />, path: "/student/access_and_devices" },
+    ],
+
+    admin: [
+      { name: "Dashboard", icon: <FaHome size={18} />, path: "/admin/dashboard" },
+      { name: "Students", icon: <FaUserGraduate size={18} />, path: "/admin/students" },
+      { name: "Teachers", icon: <FaChalkboardTeacher size={18} />, path: "/admin/teachers" },
+      { name: "Admins", icon: <MdGroups size={18} />, path: "/admin/admins" },
+      { name: "Lecture", icon: <MdOutlineClass size={18} />, path: "/admin/lecture" },
+      { name: "Course", icon: <FaBookOpen size={18} />, path: "/admin/course" },
+      { name: "Applications", icon: <FaWpforms size={18} />, path: "/admin/applications" },
+      { name: "Timetable", icon: <MdEventNote size={18} />, path: "/admin/timetable" },
+      { name: "Attendance", icon: <FaClipboardList size={18} />, path: "/admin/attendance" },
+      { name: "Assignments", icon: <MdOutlineAssignment size={18} />, path: "/admin/assignments" },
+      { name: "Settings", icon: <FaUsersCog size={18} />, path: "/admin/settings" }
+    ],
+
+    teacher: [
+      { name: "Dashboard", icon: <FaHome size={18} />, path: "/teacher/dashboard" },
+      { name: "Attendance", icon: <FaClipboardList size={18} />, path: "/teacher/attendance" }
+    ],
+  };
+
+  const hideSidebarRoutes = ["/", "/student/login", "/teacher/login", "/admin/login"];
+  if (hideSidebarRoutes.includes(location.pathname)) return null;
+
+  const userType =
+    currentRoute === "student" || currentRoute === "admin" || currentRoute === "teacher"
+      ? currentRoute
+      : null;
+
+  if (!userType) return null;
+
+  const currentMenu = menuItems[userType];
+  const portalTitle = userType.charAt(0).toUpperCase() + userType.slice(1) + " Portal";
+
+  const logout = async () => {
+    try {
+      const response = await axios.post(userType === "admin" ? `/api/v1/${userType}/logout` : `/api/v1/${userType}s/logout`,
+        {},
+        { withCredentials: true }
+      );
+
+      if (response?.data?.success) {
+        Swal.fire({
+          title: response?.data?.message,
+          icon: "success",
+          timer: 1500,
+          showConfirmButton: true,
+        });
+
+        navigate(`/login`);
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+      Swal.fire({
+        title: "Logout failed!",
+        text: "Please try again.",
+        icon: "error",
+      });
+    }
+  };
+
+  return (
+    <aside className="h-screen w-[240px] bg-[#f9fafb] border-r border-gray-200 shadow-sm flex flex-col">
+      {/* Logo Section */}
+      <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-200 flex-shrink-0">
+        <img src="/logo.png" alt="LMS Logo" className="w-9 h-9" />
+        <h1 className="text-lg font-semibold text-gray-800">{portalTitle}</h1>
+      </div>
+
+      {/* Scrollable Menu */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        <nav className="mt-4 flex flex-col gap-1 pb-6">
+          {currentMenu.map((item, index) => (
+            <NavLink
+              to={item.path}
+              key={index}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-6 py-3 text-sm font-medium rounded-md transition-all duration-200
+                ${isActive
+                  ? "bg-[#925fe2]/10 text-[#925fe2] shadow-sm"
+                  : "text-gray-700 hover:bg-gray-100 hover:text-[#925fe2]"
+                }`
+              }
+            >
+              {item.icon}
+              <span>{item.name}</span>
+            </NavLink>
+          ))}
+        </nav>
+      </div>
+
+      {/* ✅ Logout Section */}
+      <div className="p-6 border-t border-gray-200 flex-shrink-0">
+        <button
+          onClick={() => {
+            logout();
+          }}
+          className={`flex items-center gap-3 text-gray-600 hover:text-red-500 transition-all duration-200`}
+        >
+          <FaSignOutAlt size={18} />
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+  );
+}
