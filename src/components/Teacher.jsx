@@ -49,6 +49,8 @@ const Teacher = () => {
 
         if (!teacherform.cnic.trim()) {
             newErrors.cnic = "CNIC is required";
+        } else if (teacherform.cnic.length < 15) {
+            newErrors.cnic = "Please enter a valid cnic"
         }
 
         setErrors(newErrors)
@@ -78,12 +80,25 @@ const Teacher = () => {
     })
 
     const [teacherList, setTeacherList] = useState([])
+    const [currentPage, setCurrentPage] = useState(1)
+    const teacherPerPage = 10
 
     const [filteredTeachers, setFilteredTeachers] = useState(teacherList);
 
+    const indexOfLastTeacher = currentPage * teacherPerPage;
+    const indexOfFirstTeacher = indexOfLastTeacher - teacherPerPage;
+    const totalPages = Math.ceil(filteredTeachers.length / teacherPerPage);
+
+    const currectTeachers = filteredTeachers.slice(
+        indexOfFirstTeacher,
+        indexOfLastTeacher
+    )
+
     const [menu, setMenu] = useState(false)
+    const [loading3, setLoading3] = useState(false)
 
     const getTeacherList = async () => {
+        setLoading3(true)
         try {
             const response = await axios.get('/api/v1/admin/teachers');
             if (response?.data?.success) {
@@ -91,20 +106,61 @@ const Teacher = () => {
             }
         } catch (error) {
             console.log(error?.response?.data?.message)
+            setLoading3(false)
+        } finally {
+            setLoading3(false)
         }
     }
 
     const [loading, setLoading] = useState(false)
     const [loading1, setLoading1] = useState(false)
+    const [loading2, setLoading2] = useState(false)
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setTeacherform({ ...teacherform, [name]: value })
+
+        if (name === "cnic") {
+
+            let digits = value.replace(/\D/g, "");
+
+            if (digits.length > 5 && digits.length <= 12) {
+                digits = digits.slice(0, 5) + "-" + digits.slice(5);
+            } else if (digits.length > 12) {
+                digits =
+                    digits.slice(0, 5) +
+                    "-" +
+                    digits.slice(5, 12) +
+                    "-" +
+                    digits.slice(12, 13);
+            }
+
+            setTeacherform({ ...teacherform, cnic: digits });
+        } else {
+            setTeacherform({ ...teacherform, [name]: value });
+        }
     }
 
     const handleTeacherFormChange = (e) => {
         const { name, value } = e.target;
-        setTeacherDetails({ ...teacherDetails, [name]: value });
+        if (name === "cnic") {
+
+            let digits = value.replace(/\D/g, "");
+
+            if (digits.length > 5 && digits.length <= 12) {
+                digits = digits.slice(0, 5) + "-" + digits.slice(5);
+            } else if (digits.length > 12) {
+                digits =
+                    digits.slice(0, 5) +
+                    "-" +
+                    digits.slice(5, 12) +
+                    "-" +
+                    digits.slice(12, 13);
+            }
+
+            setTeacherDetails({ ...teacherDetails, cnic: digits });
+        } else {
+            setTeacherDetails({ ...teacherDetails, [name]: value });
+        }
     }
 
     const handleDelay = (delay) => {
@@ -237,7 +293,9 @@ const Teacher = () => {
         }
     }
 
-    const handleFilter = () => {
+    const handleFilter = async () => {
+        setLoading2(true)
+        await handleDelay(2)
         const result = teacherList.filter((teacher) => {
             return (
                 teacher.teacherId.toLowerCase().includes(filters.teacherId.toLowerCase()) &&
@@ -245,7 +303,9 @@ const Teacher = () => {
             )
         })
 
-        setFilteredTeachers(result)
+        setFilteredTeachers(result);
+        setCurrentPage(1);
+        setLoading2(false);
     }
 
     const totalTeachers = teacherList.length;
@@ -265,95 +325,96 @@ const Teacher = () => {
     return (
         <>
             <div className={`fixed inset-0 ${menu ? "flex" : "hidden"} justify-center items-center bg-black/60 z-50`}>
-                <div className="bg-white dark:bg-zinc-800 black:bg-black w-[90vw] md:w-[70vw] lg:w-[60vw] max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl relative p-6 border border-transparent dark:border-zinc-700 black:border-[#2a2a2a]">
+                <div className="bg-white dark:bg-zinc-800 w-[90vw] md:w-[70vw] lg:w-[60vw] max-h-[90vh] flex flex-col rounded-xl shadow-2xl relative p-6 border dark:border-zinc-700">
 
                     <button onClick={() => { setMenu(!menu); }} className="absolute top-3 right-3 text-gray-500 dark:text-zinc-400 black:text-[#666] hover:text-red-500 dark:hover:text-red-400 black:hover:text-red-500 text-xl font-bold">
                         ✕
                     </button>
 
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-zinc-100 black:text-white mb-6">📝 Teacher Record</h2>
+                    <div className="overflow-y-auto pr-2 flex-1">
+                        <form onSubmit={handleTeacherUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                    <form onSubmit={handleTeacherUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <label className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-700 dark:text-zinc-400 black:text-[#555]">Teacher ID</span>
+                                <input
+                                    type="text"
+                                    disabled
+                                    placeholder={`${teacherDetails.teacherId}`}
+                                    className="px-4 py-2 border border-gray-200 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-gray-100 dark:bg-zinc-700/50 black:bg-[#111] text-gray-400 dark:text-zinc-500 black:text-[#444] cursor-not-allowed"
+                                />
+                            </label>
 
-                        <label className="flex flex-col">
-                            <span className="text-sm font-medium text-gray-700 dark:text-zinc-400 black:text-[#555]">Teacher ID</span>
-                            <input
-                                type="text"
-                                disabled
-                                placeholder={`${teacherDetails.teacherId}`}
-                                className="px-4 py-2 border border-gray-200 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-gray-100 dark:bg-zinc-700/50 black:bg-[#111] text-gray-400 dark:text-zinc-500 black:text-[#444] cursor-not-allowed"
-                            />
-                        </label>
+                            <label className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 black:text-[#aaa]">Full Name</span>
+                                <input
+                                    type="text"
+                                    onChange={handleTeacherFormChange}
+                                    name="fullName"
+                                    value={teacherDetails.fullName}
+                                    placeholder="Full Name"
+                                    className="px-4 py-2 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] placeholder-gray-400 dark:placeholder-zinc-500 black:placeholder-[#444] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] transition"
+                                />
+                            </label>
 
-                        <label className="flex flex-col">
-                            <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 black:text-[#aaa]">Full Name</span>
-                            <input
-                                type="text"
-                                onChange={handleTeacherFormChange}
-                                name="fullName"
-                                value={teacherDetails.fullName}
-                                placeholder="Full Name"
-                                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] placeholder-gray-400 dark:placeholder-zinc-500 black:placeholder-[#444] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] transition"
-                            />
-                        </label>
+                            <label className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 black:text-[#aaa]">Specification</span>
+                                <input
+                                    type="text"
+                                    onChange={handleTeacherFormChange}
+                                    name="specification"
+                                    value={teacherDetails.specification}
+                                    placeholder="Specification"
+                                    className="px-4 py-2 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] placeholder-gray-400 dark:placeholder-zinc-500 black:placeholder-[#444] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] transition"
+                                />
+                            </label>
 
-                        <label className="flex flex-col">
-                            <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 black:text-[#aaa]">Specification</span>
-                            <input
-                                type="text"
-                                onChange={handleTeacherFormChange}
-                                name="specification"
-                                value={teacherDetails.specification}
-                                placeholder="Specification"
-                                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] placeholder-gray-400 dark:placeholder-zinc-500 black:placeholder-[#444] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] transition"
-                            />
-                        </label>
+                            <label className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 black:text-[#aaa]">Status</span>
+                                <select
+                                    onChange={handleTeacherFormChange}
+                                    name="status"
+                                    value={teacherDetails.status}
+                                    className="px-4 py-2 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] transition"
+                                >
+                                    <option>Status</option>
+                                    <option>Active</option>
+                                    <option>Disabled</option>
+                                </select>
+                            </label>
 
-                        <label className="flex flex-col">
-                            <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 black:text-[#aaa]">Status</span>
-                            <select
-                                onChange={handleTeacherFormChange}
-                                name="status"
-                                value={teacherDetails.status}
-                                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] transition"
+                            <label className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 black:text-[#aaa]">CNIC Number</span>
+                                <input
+                                    onChange={handleTeacherFormChange}
+                                    type="text"
+                                    name="cnic"
+                                    value={teacherDetails.cnic}
+                                    placeholder="CNIC Number"
+                                    className="px-4 py-2 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] placeholder-gray-400 dark:placeholder-zinc-500 black:placeholder-[#444] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] transition"
+                                />
+                            </label>
+
+                            <label className="flex flex-col">
+                                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 black:text-[#aaa]">Email</span>
+                                <input
+                                    onChange={handleTeacherFormChange}
+                                    type="email"
+                                    name="email"
+                                    value={teacherDetails.email}
+                                    placeholder="Email"
+                                    className="px-4 py-2 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] placeholder-gray-400 dark:placeholder-zinc-500 black:placeholder-[#444] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] transition"
+                                />
+                            </label>
+
+                            <button
+                                type="submit"
+                                className="col-span-1 md:col-span-2 bg-[#ba7a4e] hover:bg-[#a06840] text-white py-2 rounded-lg shadow transition"
                             >
-                                <option>Status</option>
-                                <option>Active</option>
-                                <option>Disabled</option>
-                            </select>
-                        </label>
-
-                        <label className="flex flex-col">
-                            <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 black:text-[#aaa]">CNIC Number</span>
-                            <input
-                                onChange={handleTeacherFormChange}
-                                type="text"
-                                name="cnic"
-                                value={teacherDetails.cnic}
-                                placeholder="CNIC Number"
-                                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] placeholder-gray-400 dark:placeholder-zinc-500 black:placeholder-[#444] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] transition"
-                            />
-                        </label>
-
-                        <label className="flex flex-col">
-                            <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 black:text-[#aaa]">Email</span>
-                            <input
-                                onChange={handleTeacherFormChange}
-                                type="email"
-                                name="email"
-                                value={teacherDetails.email}
-                                placeholder="Email"
-                                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] placeholder-gray-400 dark:placeholder-zinc-500 black:placeholder-[#444] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] transition"
-                            />
-                        </label>
-
-                        <button
-                            type="submit"
-                            className="col-span-1 md:col-span-2 bg-[#ba7a4e] hover:bg-[#a06840] text-white py-2 rounded-lg shadow transition"
-                        >
-                            {loading1 ? "Loading..." : "Update Teacher"}
-                        </button>
-                    </form>
+                                {loading1 ? "Loading..." : "Update Teacher"}
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
@@ -487,12 +548,13 @@ const Teacher = () => {
                                 onClick={handleFilter}
                                 className="flex-1 bg-[#ba7a4e] hover:bg-[#a86a3f] text-white font-medium rounded-lg px-4 py-3 transition"
                             >
-                                Apply
+                                {loading2 ? "Filtering..." : "Apply"}
                             </button>
                             <button
                                 onClick={() => {
                                     setFilters({ teacherId: "", name: "" });
                                     setFilteredTeachers(teacherList);
+                                    setCurrentPage(1)
                                 }}
                                 className="flex-1 bg-gray-200 dark:bg-zinc-600 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-zinc-500 font-medium rounded-lg px-4 py-3 transition"
                             >
@@ -511,20 +573,22 @@ const Teacher = () => {
                             <tr className="bg-gray-100 dark:bg-zinc-700/60 black:bg-[#141414] text-gray-700 dark:text-zinc-300 black:text-[#555] text-sm uppercase tracking-wide">
                                 <th className="p-3">#</th>
                                 <th className="p-3">Name</th>
-                                <th className="p-3">TeacherId</th>
+                                <th className="p-3">Teacher-Id</th>
                                 <th className="p-3">Specification</th>
                                 <th className="p-3">Status</th>
                                 <th className="p-3">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredTeachers.length === 0 ? (
+                            {loading3 ? <tr>
+                                <td colSpan="7" className="text-center p-6 text-[#ba7a4e]">Loading...</td>
+                            </tr> : filteredTeachers.length === 0 ? (
                                 <tr>
                                     <td colSpan="6" className="text-center p-6 text-gray-400 dark:text-zinc-500 black:text-[#333]">No Teacher Record</td>
                                 </tr>
-                            ) : filteredTeachers.map((item, index) => (
+                            ) : currectTeachers.map((item, index) => (
                                 <tr key={index} className="border-t border-gray-100 dark:border-zinc-700 black:border-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-zinc-700/40 black:hover:bg-[#141414] text-gray-800 dark:text-zinc-200 black:text-[#ccc] transition-colors">
-                                    <td className="p-3 text-gray-400 dark:text-zinc-500 black:text-[#3a3a3a]">{index + 1}</td>
+                                    <td className="p-3 text-gray-400 dark:text-zinc-500 black:text-[#3a3a3a]">{indexOfFirstTeacher + index + 1}</td>
                                     <td className="p-3 font-medium">{item.fullName}</td>
                                     <td className="p-3 font-semibold text-[#ba7a4e]">{item.teacherId}</td>
                                     <td className="p-3">{item.specification}</td>
@@ -554,6 +618,29 @@ const Teacher = () => {
                             ))}
                         </tbody>
                     </table>
+                    <div className="flex justify-between items-center mt-4">
+
+                        <button
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                            disabled={currentPage === 1}
+                            className="px-4 py-2 bg-gray-200 dark:bg-zinc-700 rounded disabled:opacity-50"
+                        >
+                            Prev
+                        </button>
+
+                        <span className="text-gray-700 dark:text-zinc-300">
+                            Page {currentPage} of {totalPages}
+                        </span>
+
+                        <button
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                            disabled={currentPage === totalPages}
+                            className="px-4 py-2 bg-gray-200 dark:bg-zinc-700 rounded disabled:opacity-50"
+                        >
+                            Next
+                        </button>
+
+                    </div>
                 </div>
             </div>
         </>

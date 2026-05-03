@@ -50,6 +50,8 @@ const Students = () => {
 
     if (!studform.cnic.trim()) {
       newErrors.cnic = "CNIC is required";
+    } else if (studform.cnic.length < 15) {
+      newErrors.cnic = "Please enter a valid cnic"
     }
 
     if (!studform.sessionStartDate.trim()) {
@@ -108,11 +110,26 @@ const Students = () => {
 
   const [studentList, setStudentList] = useState([])
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const studentPerPage = 10;
+
   const [filteredStudents, setFilteredStudents] = useState(studentList);
 
+  const indexOfLastStudent = currentPage * studentPerPage;
+  const indexOfFirstStudent = indexOfLastStudent - studentPerPage;
+
+  const totalPages = Math.ceil(filteredStudents.length / studentPerPage);
+
+  const currentStudents = filteredStudents.slice(
+    indexOfFirstStudent,
+    indexOfLastStudent
+  )
+
   const [menu, setMenu] = useState(false)
+  const [loading3, setLoading3] = useState(false)
 
   const getStudentList = async () => {
+    setLoading3(true);
     try {
       const response = await axios.get('/api/v1/admin/students');
 
@@ -126,20 +143,64 @@ const Students = () => {
     } catch (error) {
       console.log(error?.response?.data?.message);
       setStudentList([]);
+      setLoading3(false)
+    } finally {
+      setLoading3(false)
     }
   };
 
   const [loading, setLoading] = useState(false)
   const [loading1, setLoading1] = useState(false)
+  const [loading2, setLoading2] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setStudform({ ...studform, [name]: value })
-  }
+
+    if (name === "cnic") {
+
+      let digits = value.replace(/\D/g, "");
+
+      if (digits.length > 5 && digits.length <= 12) {
+        digits = digits.slice(0, 5) + "-" + digits.slice(5);
+      } else if (digits.length > 12) {
+        digits =
+          digits.slice(0, 5) +
+          "-" +
+          digits.slice(5, 12) +
+          "-" +
+          digits.slice(12, 13);
+      }
+
+      setStudform({ ...studform, cnic: digits });
+    } else {
+      setStudform({ ...studform, [name]: value });
+    }
+  };
 
   const handleStudentFormChange = (e) => {
     const { name, value } = e.target;
-    setStudentDetails({ ...studentDetails, [name]: value });
+
+    if (name === "cnic") {
+
+      let digits = value.replace(/\D/g, "");
+
+      if (digits.length > 5 && digits.length <= 12) {
+        digits = digits.slice(0, 5) + "-" + digits.slice(5);
+      } else if (digits.length > 12) {
+        digits =
+          digits.slice(0, 5) +
+          "-" +
+          digits.slice(5, 12) +
+          "-" +
+          digits.slice(12, 13);
+      }
+
+      setStudentDetails({ ...studentDetails, cnic: digits });
+    } else {
+      setStudentDetails({ ...studentDetails, [name]: value });
+    }
+
+
   }
 
   const handleDelay = (delay) => {
@@ -287,7 +348,11 @@ const Students = () => {
     }
   }
 
-  const handleFilter = () => {
+  const handleFilter = async () => {
+
+    setLoading2(true);
+    await handleDelay(2);
+
     const result = studentList.filter((student) => {
       return (
         student.studentId.toLowerCase().includes(filters.studentId.toLowerCase()) &&
@@ -297,6 +362,8 @@ const Students = () => {
     });
 
     setFilteredStudents(result);
+    setCurrentPage(1);
+    setLoading2(false);
   };
 
   const totalStudents = studentList.length;
@@ -332,8 +399,8 @@ const Students = () => {
   return (
     <>
 
-      <div className={`fixed inset-0 ${menu ? "flex" : "hidden"} justify-center items-center bg-black/60 z-50`}>
-        <div className="bg-white dark:bg-zinc-800 w-[90vw] md:w-[70vw] lg:w-[60vw] max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl relative p-6 border border-transparent dark:border-zinc-700">
+      <div className={`fixed inset-0 ${menu ? "flex" : "hidden"} justify-center items-center bg-black/60 z-50 `}>
+        <div className="bg-white dark:bg-zinc-800 w-[90vw] md:w-[70vw] lg:w-[60vw] max-h-[90vh] flex flex-col rounded-xl shadow-2xl relative p-6 border dark:border-zinc-700">
 
           <button onClick={() => { setMenu(!menu); }} className="absolute top-3 right-3 text-gray-500 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 text-xl font-bold">
             ✕
@@ -341,301 +408,302 @@ const Students = () => {
 
           <h2 className="text-xl font-semibold text-gray-800 dark:text-zinc-100 mb-6">📝 Student Record</h2>
 
-          <form onSubmit={handleStudentUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="overflow-y-auto pr-2 flex-1">
+            <form onSubmit={handleStudentUpdate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-400">Sto Count</span>
-              <input
-                type="text"
-                disabled
-                placeholder={`${studentDetails.stoCount}`}
-                className="px-4 py-2 border border-gray-200 dark:border-zinc-600 rounded-lg bg-gray-100 dark:bg-zinc-700/50 text-gray-400 dark:text-zinc-500 cursor-not-allowed"
-              />
-            </label>
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-400">Sto Count</span>
+                <input
+                  type="text"
+                  disabled
+                  placeholder={`${studentDetails.stoCount}`}
+                  className="px-4 py-2 border border-gray-200 dark:border-zinc-600 rounded-lg bg-gray-100 dark:bg-zinc-700/50 text-gray-400 dark:text-zinc-500 cursor-not-allowed"
+                />
+              </label>
 
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-400">Student ID</span>
-              <input
-                type="text"
-                disabled
-                placeholder={`${studentDetails.studentId}`}
-                className="px-4 py-2 border border-gray-200 dark:border-zinc-600 rounded-lg bg-gray-100 dark:bg-zinc-700/50 text-gray-400 dark:text-zinc-500 cursor-not-allowed"
-              />
-            </label>
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-400">Student ID</span>
+                <input
+                  type="text"
+                  disabled
+                  placeholder={`${studentDetails.studentId}`}
+                  className="px-4 py-2 border border-gray-200 dark:border-zinc-600 rounded-lg bg-gray-100 dark:bg-zinc-700/50 text-gray-400 dark:text-zinc-500 cursor-not-allowed"
+                />
+              </label>
 
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Full Name</span>
-              <input
-                type="text"
-                onChange={handleStudentFormChange}
-                name="fullName"
-                value={studentDetails.fullName}
-                placeholder="Full Name"
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] dark:focus:border-[#ba7a4e] transition"
-              />
-            </label>
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Full Name</span>
+                <input
+                  type="text"
+                  onChange={handleStudentFormChange}
+                  name="fullName"
+                  value={studentDetails.fullName}
+                  placeholder="Full Name"
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] dark:focus:border-[#ba7a4e] transition"
+                />
+              </label>
 
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Program</span>
-              <select
-                onChange={handleStudentFormChange}
-                name="degreeTitle"
-                value={studentDetails.degreeTitle}
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Program</span>
+                <select
+                  onChange={handleStudentFormChange}
+                  name="degreeTitle"
+                  value={studentDetails.degreeTitle}
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                >
+                  <option value="">Select Program</option>
+                  <option>BSCS</option>
+                  <option>BSIT</option>
+                  <option>BSPHY</option>
+                  <option>BSCHEM</option>
+                  <option>BSISL</option>
+                  <option>BSENG</option>
+                </select>
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Address</span>
+                <input
+                  onChange={handleStudentFormChange}
+                  name="address"
+                  value={studentDetails.address}
+                  type="text"
+                  placeholder="Address"
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                />
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Registration Number</span>
+                <input
+                  onChange={handleStudentFormChange}
+                  name="registrationNumber"
+                  value={studentDetails.registrationNumber}
+                  type="text"
+                  placeholder="Registration Number"
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                />
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">University Roll No</span>
+                <input
+                  onChange={handleStudentFormChange}
+                  type="text"
+                  name="universityRollNumber"
+                  value={studentDetails.universityRollNumber}
+                  placeholder="University Roll No"
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                />
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">College Roll No</span>
+                <input
+                  onChange={handleStudentFormChange}
+                  type="text"
+                  name="collegeRollNo"
+                  value={studentDetails.collegeRollNo}
+                  placeholder="College Roll No"
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                />
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Shift</span>
+                <select
+                  onChange={handleStudentFormChange}
+                  name="shift"
+                  value={studentDetails.shift}
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                >
+                  <option value="">Select Shift</option>
+                  <option>Morning</option>
+                  <option>Evening</option>
+                </select>
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Section</span>
+                <select
+                  onChange={handleStudentFormChange}
+                  name="section"
+                  value={studentDetails.section}
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                >
+                  <option value="">Select Section</option>
+                  <option>G1</option>
+                  <option>G2</option>
+                </select>
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Semester</span>
+                <select
+                  onChange={handleStudentFormChange}
+                  name="semester"
+                  value={studentDetails.semester}
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                >
+                  <option value="">Select Semester</option>
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                  <option>6</option>
+                  <option>7</option>
+                  <option>8</option>
+                </select>
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Session Start Date</span>
+                <input
+                  onChange={handleStudentFormChange}
+                  type="date"
+                  name="sessionStartDate"
+                  value={studentDetails.sessionStartDate}
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                />
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Session End Date</span>
+                <input
+                  onChange={handleStudentFormChange}
+                  type="date"
+                  name="sessionEndDate"
+                  value={studentDetails.sessionEndDate}
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                />
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Status</span>
+                <select
+                  onChange={handleStudentFormChange}
+                  name="status"
+                  value={studentDetails.status}
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                >
+                  <option>Status</option>
+                  <option>Active</option>
+                  <option>Disabled</option>
+                </select>
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Background</span>
+                <select
+                  onChange={handleStudentFormChange}
+                  name="Background"
+                  value={studentDetails.Background}
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                >
+                  <option value="">Select Background</option>
+                  <option>Medical</option>
+                  <option>Non-Medical</option>
+                </select>
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">HSSC Degree</span>
+                <select
+                  onChange={handleStudentFormChange}
+                  name="hsscDegree"
+                  value={studentDetails.hsscDegree}
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                >
+                  <option value="">Select HSSC Degree</option>
+                  <option>FA</option>
+                  <option>ICS</option>
+                  <option>Pre-engineering</option>
+                  <option>Pre-medical</option>
+                </select>
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">HSSC Marks</span>
+                <input
+                  onChange={handleStudentFormChange}
+                  type="number"
+                  name="hsscMarks"
+                  value={studentDetails.hsscMarks}
+                  placeholder="HSSC Marks"
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                />
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">CNIC Number</span>
+                <input
+                  onChange={handleStudentFormChange}
+                  type="text"
+                  name="cnic"
+                  value={studentDetails.cnic}
+                  placeholder="CNIC Number"
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                />
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Date of Birth</span>
+                <input
+                  onChange={handleStudentFormChange}
+                  type="date"
+                  name="dob"
+                  value={studentDetails.dob}
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                />
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Email</span>
+                <input
+                  onChange={handleStudentFormChange}
+                  type="email"
+                  name="email"
+                  value={studentDetails.email}
+                  placeholder="Email"
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                />
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Phone</span>
+                <input
+                  onChange={handleStudentFormChange}
+                  type="text"
+                  name="phone"
+                  value={studentDetails.phone}
+                  placeholder="Phone"
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                />
+              </label>
+
+              <label className="flex flex-col">
+                <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Mobile</span>
+                <input
+                  onChange={handleStudentFormChange}
+                  type="text"
+                  name="mobile"
+                  value={studentDetails.mobile}
+                  placeholder="Mobile"
+                  className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
+                />
+              </label>
+
+              <button
+                type="submit"
+                className="col-span-1 md:col-span-2 bg-[#ba7a4e] hover:bg-[#a06840] text-white py-2 rounded-lg shadow transition"
               >
-                <option value="">Select Program</option>
-                <option>BSCS</option>
-                <option>BSIT</option>
-                <option>BSPHY</option>
-                <option>BSCHEM</option>
-                <option>BSISL</option>
-                <option>BSENG</option>
-              </select>
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Address</span>
-              <input
-                onChange={handleStudentFormChange}
-                name="address"
-                value={studentDetails.address}
-                type="text"
-                placeholder="Address"
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              />
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Registration Number</span>
-              <input
-                onChange={handleStudentFormChange}
-                name="registrationNumber"
-                value={studentDetails.registrationNumber}
-                type="text"
-                placeholder="Registration Number"
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              />
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">University Roll No</span>
-              <input
-                onChange={handleStudentFormChange}
-                type="text"
-                name="universityRollNumber"
-                value={studentDetails.universityRollNumber}
-                placeholder="University Roll No"
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              />
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">College Roll No</span>
-              <input
-                onChange={handleStudentFormChange}
-                type="text"
-                name="collegeRollNo"
-                value={studentDetails.collegeRollNo}
-                placeholder="College Roll No"
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              />
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Shift</span>
-              <select
-                onChange={handleStudentFormChange}
-                name="shift"
-                value={studentDetails.shift}
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              >
-                <option value="">Select Shift</option>
-                <option>Morning</option>
-                <option>Evening</option>
-              </select>
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Section</span>
-              <select
-                onChange={handleStudentFormChange}
-                name="section"
-                value={studentDetails.section}
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              >
-                <option value="">Select Section</option>
-                <option>G1</option>
-                <option>G2</option>
-              </select>
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Semester</span>
-              <select
-                onChange={handleStudentFormChange}
-                name="semester"
-                value={studentDetails.semester}
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              >
-                <option value="">Select Semester</option>
-                <option>1</option>
-                <option>2</option>
-                <option>3</option>
-                <option>4</option>
-                <option>5</option>
-                <option>6</option>
-                <option>7</option>
-                <option>8</option>
-              </select>
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Session Start Date</span>
-              <input
-                onChange={handleStudentFormChange}
-                type="date"
-                name="sessionStartDate"
-                value={studentDetails.sessionStartDate}
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              />
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Session End Date</span>
-              <input
-                onChange={handleStudentFormChange}
-                type="date"
-                name="sessionEndDate"
-                value={studentDetails.sessionEndDate}
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              />
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Status</span>
-              <select
-                onChange={handleStudentFormChange}
-                name="status"
-                value={studentDetails.status}
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              >
-                <option>Status</option>
-                <option>Active</option>
-                <option>Disabled</option>
-              </select>
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Background</span>
-              <select
-                onChange={handleStudentFormChange}
-                name="Background"
-                value={studentDetails.Background}
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              >
-                <option value="">Select Background</option>
-                <option>Medical</option>
-                <option>Non-Medical</option>
-              </select>
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">HSSC Degree</span>
-              <select
-                onChange={handleStudentFormChange}
-                name="hsscDegree"
-                value={studentDetails.hsscDegree}
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              >
-                <option value="">Select HSSC Degree</option>
-                <option>FA</option>
-                <option>ICS</option>
-                <option>Pre-engineering</option>
-                <option>Pre-medical</option>
-              </select>
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">HSSC Marks</span>
-              <input
-                onChange={handleStudentFormChange}
-                type="number"
-                name="hsscMarks"
-                value={studentDetails.hsscMarks}
-                placeholder="HSSC Marks"
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              />
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">CNIC Number</span>
-              <input
-                onChange={handleStudentFormChange}
-                type="text"
-                name="cnic"
-                value={studentDetails.cnic}
-                placeholder="CNIC Number"
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              />
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Date of Birth</span>
-              <input
-                onChange={handleStudentFormChange}
-                type="date"
-                name="dob"
-                value={studentDetails.dob}
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              />
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Email</span>
-              <input
-                onChange={handleStudentFormChange}
-                type="email"
-                name="email"
-                value={studentDetails.email}
-                placeholder="Email"
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              />
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Phone</span>
-              <input
-                onChange={handleStudentFormChange}
-                type="text"
-                name="phone"
-                value={studentDetails.phone}
-                placeholder="Phone"
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              />
-            </label>
-
-            <label className="flex flex-col">
-              <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Mobile</span>
-              <input
-                onChange={handleStudentFormChange}
-                type="text"
-                name="mobile"
-                value={studentDetails.mobile}
-                placeholder="Mobile"
-                className="px-4 py-2 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] dark:focus:ring-[#ba7a4e] transition"
-              />
-            </label>
-
-            <button
-              type="submit"
-              className="col-span-1 md:col-span-2 bg-[#ba7a4e] hover:bg-[#a06840] text-white py-2 rounded-lg shadow transition"
-            >
-              {loading1 ? "Loading..." : "Update Student"}
-            </button>
-          </form>
-
+                {loading1 ? "Loading..." : "Update Student"}
+              </button>
+            </form>
+          </div>
         </div>
-      </div>
+      </div >
 
       <div className="p-6 bg-gray-50 dark:bg-zinc-900 min-h-screen">
         <div className="mb-6">
@@ -835,13 +903,14 @@ const Students = () => {
                 onClick={handleFilter}
                 className="flex-1 bg-[#ba7a4e] hover:bg-[#a86a3f] text-white font-medium rounded-lg px-4 py-3 transition"
               >
-                Apply
+                {loading2 ? "Filtering..." : "Apply"}
               </button>
 
               <button
                 onClick={() => {
                   setFilters({ studentId: "", name: "", collegeRollNo: "" });
                   setFilteredStudents(studentList);
+                  setCurrentPage(1);
                 }}
                 className="flex-1 bg-gray-200 dark:bg-zinc-600 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-zinc-500 font-medium rounded-lg px-4 py-3 transition"
               >
@@ -863,7 +932,7 @@ const Students = () => {
                 <tr className="bg-gray-100 dark:bg-zinc-700/60 text-gray-700 dark:text-zinc-300 text-sm uppercase tracking-wide">
                   <th className="p-3">#</th>
                   <th className="p-3">Name</th>
-                  <th className="p-3">Roll No</th>
+                  <th className="p-3">CRN</th>
                   <th className="p-3">Class</th>
                   <th className="p-3">Student-Id</th>
                   <th className="p-3">Status</th>
@@ -871,13 +940,15 @@ const Students = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredStudents.length === 0 ? (
+                {loading3 ? <tr>
+                  <td colSpan="7" className="text-center p-6 text-[#ba7a4e]">Loading...</td>
+                </tr> : filteredStudents.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="text-center p-6 text-gray-400 dark:text-zinc-500">No Student Record</td>
                   </tr>
-                ) : filteredStudents.map((item, index) => (
+                ) : currentStudents.map((item, index) => (
                   <tr key={index} className="border-t border-gray-100 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-700/40 text-gray-800 dark:text-zinc-200 transition-colors">
-                    <td className="p-3 text-gray-400 dark:text-zinc-500">{index + 1}</td>
+                    <td className="p-3 text-gray-400 dark:text-zinc-500">{indexOfFirstStudent + index + 1}</td>
                     <td className="p-3 font-medium">{item.fullName}</td>
                     <td className="p-3">{item.collegeRollNo}</td>
                     <td className="p-3">{item.degreeTitle}</td>
@@ -890,7 +961,7 @@ const Students = () => {
                         {item.status}
                       </span>
                     </td>
-                    <td className="p-3 flex gap-2">
+                    <td className="p-3 flex md:flex-row flex-col md:gap-x-2 gap-y-2">
                       <button
                         onClick={() => { handleFetchStudentRecord(item._id); setMenu(!menu); }}
                         className="px-3 py-1 text-sm bg-[#ba7a4e] hover:bg-[#a06840] text-white rounded-lg shadow transition"
@@ -908,6 +979,29 @@ const Students = () => {
                 ))}
               </tbody>
             </table>
+            <div className="flex justify-between items-center mt-4">
+
+              <button
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="px-4 py-2 bg-gray-200 dark:bg-zinc-700 rounded disabled:opacity-50"
+              >
+                Prev
+              </button>
+
+              <span className="text-gray-700 dark:text-zinc-300">
+                Page {currentPage} of {totalPages}
+              </span>
+
+              <button
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="px-4 py-2 bg-gray-200 dark:bg-zinc-700 rounded disabled:opacity-50"
+              >
+                Next
+              </button>
+
+            </div>
           </div>
         </div>
       </div>
