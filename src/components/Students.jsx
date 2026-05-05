@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import { FaEye } from "react-icons/fa";
-import { MdDelete } from "react-icons/md";
+import { MdDelete, MdLockReset } from "react-icons/md";
 import Footer from "./Footer";
 
 const Students = () => {
@@ -345,6 +345,44 @@ const Students = () => {
       });
     } finally {
       setLoading1(false)
+    }
+  }
+
+  const handleResetPassword = async (id) => {
+    try {
+      Swal.fire({
+        title: "Do you want to reset the password?",
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: "Reset",
+        denyButtonText: `Don't reset`,
+        theme: isDark ? "dark" : "light"
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const response = await axios.post("/api/v1/admin/student/reset-password", { id: id }, { withCredentials: true });
+          if (response?.data?.success) {
+            await Swal.fire({
+              title: "Reset!",
+              icon: "success",
+              theme: isDark ? "dark" : "light"
+            });
+          }
+        }
+        else if (result.isDenied) {
+          await Swal.fire({
+            title: "Password are not reset!",
+            icon: "info",
+            theme: isDark ? "dark" : "light"
+          });
+        }
+      });
+    } catch (error) {
+      await Swal.fire({
+        title: error.response.data.message,
+        icon: "error",
+        draggable: true,
+        theme: isDark ? "dark" : "light"
+      });
     }
   }
 
@@ -967,6 +1005,12 @@ const Students = () => {
                         className="px-3 py-1 text-sm bg-[#ba7a4e] hover:bg-[#a06840] text-white rounded-lg shadow transition"
                       >
                         <FaEye size={18} />
+                      </button>
+                      <button
+                        onClick={() => { handleResetPassword(item._id); }}
+                        className="px-3 py-1 text-sm bg-[#ba7a4e] hover:bg-[#a06840] text-white rounded-lg shadow transition"
+                      >
+                        <MdLockReset size={18} />
                       </button>
                       <button
                         onClick={() => { handleDelete(item._id) }}

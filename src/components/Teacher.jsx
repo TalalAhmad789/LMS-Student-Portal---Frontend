@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import { FaEye } from "react-icons/fa";
-import { MdDelete } from "react-icons/md";
+import { MdDelete, MdLockReset } from "react-icons/md";
 
 const Teacher = () => {
 
@@ -308,6 +308,44 @@ const Teacher = () => {
         setLoading2(false);
     }
 
+    const handleResetPassword = async (id) => {
+        try {
+            Swal.fire({
+                title: "Do you want to reset the password?",
+                showDenyButton: true,
+                showCancelButton: true,
+                confirmButtonText: "Reset",
+                denyButtonText: `Don't reset`,
+                theme: isDark ? "dark" : "light"
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const response = await axios.post("/api/v1/admin/teacher/reset-password", { id: id }, { withCredentials: true });
+                    if (response?.data?.success) {
+                        await Swal.fire({
+                            title: "Reset!",
+                            icon: "success",
+                            theme: isDark ? "dark" : "light"
+                        });
+                    }
+                }
+                else if (result.isDenied) {
+                    await Swal.fire({
+                        title: "Password are not reset!",
+                        icon: "info",
+                        theme: isDark ? "dark" : "light"
+                    });
+                }
+            });
+        } catch (error) {
+            await Swal.fire({
+                title: error.response.data.message,
+                icon: "error",
+                draggable: true,
+                theme: isDark ? "dark" : "light"
+            });
+        }
+    }
+
     const totalTeachers = teacherList.length;
 
     const activeTeachers = teacherList.filter(
@@ -420,7 +458,7 @@ const Teacher = () => {
 
             <div className="p-6 bg-gray-50 dark:bg-zinc-900 black:bg-black min-h-screen">
                 <div className="mb-6">
-                    <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-100 black:text-white">👩‍🎓 Teacher Management</h1>
+                    <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-100 black:text-white">Teacher Management</h1>
                     <p className="text-sm text-gray-500 dark:text-zinc-400 black:text-[#555]">
                         Add, view, and manage all registered teachers in the system.
                     </p>
@@ -581,7 +619,7 @@ const Teacher = () => {
                         </thead>
                         <tbody>
                             {loading3 ? <tr>
-                                <td colSpan="7" className="text-center p-6 text-[#ba7a4e]">Loading...</td>
+                                <td colSpan="6" className="text-center p-6 text-[#ba7a4e]">Loading...</td>
                             </tr> : filteredTeachers.length === 0 ? (
                                 <tr>
                                     <td colSpan="6" className="text-center p-6 text-gray-400 dark:text-zinc-500 black:text-[#333]">No Teacher Record</td>
@@ -606,6 +644,12 @@ const Teacher = () => {
                                             className="px-3 py-1 text-sm bg-[#ba7a4e] hover:bg-[#a06840] text-white rounded-lg shadow transition"
                                         >
                                             <FaEye size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => { handleResetPassword(item._id); }}
+                                            className="px-3 py-1 text-sm bg-[#ba7a4e] hover:bg-[#a06840] text-white rounded-lg shadow transition"
+                                        >
+                                            <MdLockReset size={18} />
                                         </button>
                                         <button
                                             onClick={() => { handleDelete(item._id) }}

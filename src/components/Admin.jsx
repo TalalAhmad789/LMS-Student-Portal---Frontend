@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import axios from 'axios'
 import Swal from 'sweetalert2'
+import { FaEye } from "react-icons/fa";
+import { MdDelete, MdLockReset } from "react-icons/md";
 
 const Admin = () => {
 
@@ -23,7 +25,40 @@ const Admin = () => {
   }, []);
 
   const isDark = theme === "dark";
-  
+
+  const [filters, setFilters] = useState({
+    name: "",
+    email: ""
+  })
+
+  const [errors, setErrors] = useState({})
+
+  const validate = () => {
+    const newErrors = {}
+
+    if (!adminform.fullName.trim()) {
+      newErrors.fullName = "Full name is required"
+    } else if (adminform.fullName.length < 2) {
+      newErrors.fullName = "Minimum 2 characters required";
+    } else if (adminform.fullName.length > 50) {
+      newErrors.fullName = "Maximum 50 characters allowed";
+    }
+
+    if (!adminform.email.trim()) {
+      newErrors.email = "Email is required"
+    }
+
+    if (!adminform.cnic.trim()) {
+      newErrors.cnic = "CNIC is required";
+    } else if (adminform.cnic.length < 15) {
+      newErrors.cnic = "Please enter a valid cnic"
+    }
+
+    setErrors(newErrors)
+
+    return Object.keys(newErrors).length === 0;
+  }
+
   const [adminform, setAdminform] = useState({
     fullName: "",
     email: "",
@@ -41,10 +76,24 @@ const Admin = () => {
   })
 
   const [adminList, setAdminList] = useState([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const adminPerPage = 10
+
+  const [filteredAdmins, setFilteredAdmins] = useState(adminList);
+
+  const indexOfLastAdmin = currentPage * adminPerPage;
+  const indexOfFirstAdmin = indexOfLastAdmin - adminPerPage;
+  const totalPages = Math.ceil(filteredAdmins.length / adminPerPage);
+
+  const currectAdmins = filteredAdmins.slice(
+    indexOfFirstAdmin,
+    indexOfLastAdmin
+  )
 
   const [menu, setMenu] = useState(false)
 
   const getAdminList = async () => {
+    setLoading3(true)
     try {
       const response = await axios.get('/api/v1/admin/admins');
       if (response?.data?.success) {
@@ -53,20 +102,100 @@ const Admin = () => {
       }
     } catch (error) {
       console.log(error?.response?.data?.message)
+      setLoading3(false)
+    } finally {
+      setLoading3(false)
     }
   }
 
   const [loading, setLoading] = useState(false)
   const [loading1, setLoading1] = useState(false)
+  const [loading2, setLoading2] = useState(false)
+  const [loading3, setLoading3] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setAdminform({ ...adminform, [name]: value })
+
+    if (name === "cnic") {
+
+      let digits = value.replace(/\D/g, "");
+
+      if (digits.length > 5 && digits.length <= 12) {
+        digits = digits.slice(0, 5) + "-" + digits.slice(5);
+      } else if (digits.length > 12) {
+        digits =
+          digits.slice(0, 5) +
+          "-" +
+          digits.slice(5, 12) +
+          "-" +
+          digits.slice(12, 13);
+      }
+
+      setAdminform({ ...adminform, cnic: digits });
+    } else {
+      setAdminform({ ...adminform, [name]: value });
+    }
+  }
+
+  const handleResetPassword = async (id) => {
+    try {
+      Swal.fire({
+        title: "Do you want to reset the password?",
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: "Reset",
+        denyButtonText: `Don't reset`,
+        theme: isDark ? "dark" : "light"
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          const response = await axios.post("/api/v1/admin/admin/reset-password", { id: id }, { withCredentials: true });
+          if (response?.data?.success) {
+            await Swal.fire({
+              title: "Reset!",
+              icon: "success",
+              theme: isDark ? "dark" : "light"
+            });
+          }
+        }
+        else if (result.isDenied) {
+          await Swal.fire({
+            title: "Password are not reset!",
+            icon: "info",
+            theme: isDark ? "dark" : "light"
+          });
+        }
+      });
+    } catch (error) {
+      await Swal.fire({
+        title: error.response.data.message,
+        icon: "error",
+        draggable: true,
+        theme: isDark ? "dark" : "light"
+      });
+    }
   }
 
   const handleAdminFormChange = (e) => {
     const { name, value } = e.target;
-    setAdminDetails({ ...adminDetails, [name]: value });
+    if (name === "cnic") {
+
+      let digits = value.replace(/\D/g, "");
+
+      if (digits.length > 5 && digits.length <= 12) {
+        digits = digits.slice(0, 5) + "-" + digits.slice(5);
+      } else if (digits.length > 12) {
+        digits =
+          digits.slice(0, 5) +
+          "-" +
+          digits.slice(5, 12) +
+          "-" +
+          digits.slice(12, 13);
+      }
+
+      setAdminDetails({ ...adminDetails, cnic: digits });
+    } else {
+      setAdminDetails({ ...adminDetails, [name]: value });
+    }
   }
 
   const handleDelay = (delay) => {
@@ -79,6 +208,9 @@ const Admin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!validate()) return;
+
     try {
       setLoading(true)
       await handleDelay(4)
@@ -194,14 +326,20 @@ const Admin = () => {
     }
   }
 
-  const filteredAdmins = adminList.filter(admin => {
-    const term = searchTerm.toLowerCase();
+  const handleFilter = async () => {
+    setLoading2(true)
+    await handleDelay(2)
+    const result = adminList.filter((admin) => {
+      return (
+        admin.email.toLowerCase().includes(filters.email.toLowerCase()) &&
+        admin.fullName.toLowerCase().includes(filters.name.toLowerCase())
+      )
+    })
 
-    return (
-      admin.fullName?.toLowerCase().includes(term) ||
-      admin.email?.toLowerCase().includes(term)
-    )
-  });
+    setFilteredAdmins(result);
+    setCurrentPage(1);
+    setLoading2(false);
+  }
 
   const totalAdmins = adminList.length;
 
@@ -212,6 +350,10 @@ const Admin = () => {
   useEffect(() => {
     getAdminList()
   }, [])
+
+  useEffect(() => {
+    setFilteredAdmins(adminList)
+  }, [adminList])
 
   return (
     <>
@@ -246,6 +388,7 @@ const Admin = () => {
                 name="email"
                 value={adminDetails.email}
                 placeholder="Email"
+                required
                 className="px-4 py-2 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] placeholder-gray-400 dark:placeholder-zinc-500 black:placeholder-[#444] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] transition"
               />
             </label>
@@ -288,7 +431,7 @@ const Admin = () => {
 
       <div className="p-6 bg-gray-50 dark:bg-zinc-900 black:bg-black min-h-screen">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-100 black:text-white">👩‍🎓 Admin Management</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-100 black:text-white">Admin Management</h1>
           <p className="text-sm text-gray-500 dark:text-zinc-400 black:text-[#555]">
             Add, view, and manage all registered admins in the system.
           </p>
@@ -326,6 +469,7 @@ const Admin = () => {
                 placeholder="Enter full name"
                 className="px-4 py-2.5 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] placeholder-gray-400 dark:placeholder-zinc-500 black:placeholder-[#444] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] focus:border-[#ba7a4e] transition"
               />
+              {errors.fullName && <p className="text-red-500 text-sm">{errors.fullName}</p>}
             </div>
 
             <div className="flex flex-col">
@@ -339,8 +483,10 @@ const Admin = () => {
                 name="email"
                 value={adminform.email}
                 placeholder="Enter email address"
+                required
                 className="px-4 py-2.5 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] placeholder-gray-400 dark:placeholder-zinc-500 black:placeholder-[#444] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] focus:border-[#ba7a4e] transition"
               />
+              {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
             </div>
 
             <div className="flex flex-col">
@@ -356,6 +502,7 @@ const Admin = () => {
                 placeholder="XXXXX-XXXXXXX-X"
                 className="px-4 py-2.5 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] placeholder-gray-400 dark:placeholder-zinc-500 black:placeholder-[#444] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] focus:border-[#ba7a4e] transition"
               />
+              {errors.cnic && <p className="text-red-500 text-sm">{errors.cnic}</p>}
             </div>
 
             <div className="md:col-span-2 flex justify-end">
@@ -369,15 +516,49 @@ const Admin = () => {
           </form>
         </div>
 
-        {/* Search */}
-        <div className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] shadow-md rounded-xl p-4 mb-6 border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f]">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => { setSearchTerm(e.target.value) }}
-            placeholder="🔍 Search by Email or Name..."
-            className="w-full px-4 py-3 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] placeholder-gray-400 dark:placeholder-zinc-500 black:placeholder-[#444] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] focus:border-[#ba7a4e] transition"
-          />
+        <div className="bg-white dark:bg-zinc-800 shadow-md rounded-xl p-4 mb-6 border border-gray-100 dark:border-zinc-700">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            <input
+              type="text"
+              value={filters.email}
+              onChange={(e) =>
+                setFilters({ ...filters, email: e.target.value })
+              }
+              placeholder="Email"
+              className="px-4 py-3 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]"
+            />
+
+            <input
+              type="text"
+              value={filters.name}
+              onChange={(e) =>
+                setFilters({ ...filters, name: e.target.value })
+              }
+              placeholder="Name"
+              className="px-4 py-3 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]"
+            />
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleFilter}
+                className="flex-1 bg-[#ba7a4e] hover:bg-[#a86a3f] text-white font-medium rounded-lg px-4 py-3 transition"
+              >
+                {loading2 ? "Filtering..." : "Apply"}
+              </button>
+              <button
+                onClick={() => {
+                  setFilters({ email: "", name: "" });
+                  setFilteredAdmins(adminList);
+                  setCurrentPage(1)
+                }}
+                className="flex-1 bg-gray-200 dark:bg-zinc-600 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-zinc-500 font-medium rounded-lg px-4 py-3 transition"
+              >
+                Reset
+              </button>
+            </div>
+
+          </div>
         </div>
 
         {/* Admin Table */}
@@ -394,13 +575,15 @@ const Admin = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredAdmins.length === 0 ? (
+              {loading3 ? <tr>
+                <td colSpan="6" className="text-center p-6 text-[#ba7a4e]">Loading...</td>
+              </tr> : filteredAdmins.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="text-center p-6 text-gray-400 dark:text-zinc-500 black:text-[#333]">No Admin Record</td>
                 </tr>
-              ) : filteredAdmins.map((item, index) => (
+              ) : currectAdmins.map((item, index) => (
                 <tr key={index} className="border-t border-gray-100 dark:border-zinc-700 black:border-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-zinc-700/40 black:hover:bg-[#141414] text-gray-800 dark:text-zinc-200 black:text-[#ccc] transition-colors">
-                  <td className="p-3 text-gray-400 dark:text-zinc-500 black:text-[#3a3a3a]">{index + 1}</td>
+                  <td className="p-3 text-gray-400 dark:text-zinc-500 black:text-[#3a3a3a]">{indexOfFirstAdmin + index + 1}</td>
                   <td className="p-3 font-medium">{item.fullName}</td>
                   <td className="p-3 font-semibold text-[#ba7a4e]">{item.email}</td>
                   <td className="p-3">{item.cnic}</td>
@@ -412,24 +595,53 @@ const Admin = () => {
                       {item.status}
                     </span>
                   </td>
-                  <td className="p-3 flex gap-2">
+                  <td className="p-3 flex md:flex-row flex-col md:gap-x-2 gap-y-2">
                     <button
                       onClick={() => { handleFetchAdminRecord(item._id); setMenu(!menu); }}
                       className="px-3 py-1 text-sm bg-[#ba7a4e] hover:bg-[#a06840] text-white rounded-lg shadow transition"
                     >
-                      View
+                      <FaEye size={18} />
+                    </button>
+                    <button
+                      onClick={() => { handleResetPassword(item._id); }}
+                      className="px-3 py-1 text-sm bg-[#ba7a4e] hover:bg-[#a06840] text-white rounded-lg shadow transition"
+                    >
+                      <MdLockReset size={18} />
                     </button>
                     <button
                       onClick={() => { handleDelete(item._id) }}
                       className="px-3 py-1 text-sm bg-red-500 hover:bg-red-600 dark:bg-red-500/20 dark:hover:bg-red-500/30 dark:text-red-400 black:bg-red-500/10 black:hover:bg-red-500/20 black:text-red-500 text-white rounded-lg transition"
                     >
-                      Remove
+                      <MdDelete size={18} />
                     </button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          <div className="flex justify-between items-center mt-4">
+
+            <button
+              onClick={() => setCurrentPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-4 py-2 bg-gray-200 dark:bg-zinc-700 rounded disabled:opacity-50"
+            >
+              Prev
+            </button>
+
+            <span className="text-gray-700 dark:text-zinc-300">
+              Page {currentPage} of {totalPages}
+            </span>
+
+            <button
+              onClick={() => setCurrentPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 bg-gray-200 dark:bg-zinc-700 rounded disabled:opacity-50"
+            >
+              Next
+            </button>
+
+          </div>
         </div>
       </div>
     </>
