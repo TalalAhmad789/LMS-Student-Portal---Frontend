@@ -44,7 +44,6 @@ export default function Sidebar({ studentInfo }) {
       { name: "Learning", icon: <FaBookReader size={18} />, path: "/student/learning" },
       { name: "Feedback", icon: <FaComments size={18} />, path: "/student/feedback" },
       { name: "Mailbox", icon: <FaEnvelope size={18} />, path: "/student/mailbox" },
-      { name: "Security", icon: <FaShieldAlt size={18} />, path: "/student/security" },
       { name: "Access & Devices", icon: <FaLaptop size={18} />, path: "/student/access_and_devices" },
     ],
 
@@ -109,54 +108,9 @@ export default function Sidebar({ studentInfo }) {
   };
 
   return (
-    // <aside className="h-screen w-[240px] bg-[#f9fafb] border-r border-gray-200 shadow-sm flex flex-col">
-    //   {/* Logo Section */}
-    //   <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-200 flex-shrink-0">
-    //     <img src="/logo.png" alt="LMS Logo" className="w-9 h-9" />
-    //     <h1 className="text-lg font-semibold text-gray-800">{portalTitle}</h1>
-    //   </div>
-
-    //   {/* Scrollable Menu */}
-    //   <div className="flex-1 overflow-y-auto overflow-x-hidden">
-    //     <nav className="mt-4 flex flex-col gap-1 pb-6">
-    //       {currentMenu.map((item, index) => (
-    //         <NavLink
-    //           to={item.path}
-    //           key={index}
-    //           className={({ isActive }) =>
-    //             `flex items-center gap-3 px-6 py-3 text-sm font-medium rounded-md transition-all duration-200
-    //             ${isActive
-    //               ? "bg-[#925fe2]/10 text-[#925fe2] shadow-sm"
-    //               : "text-gray-700 hover:bg-gray-100 hover:text-[#925fe2]"
-    //             }`
-    //           }
-    //         >
-    //           {item.icon}
-    //           <span>{item.name}</span>
-    //         </NavLink>
-    //       ))}
-    //     </nav>
-    //   </div>
-
-    //   {/* ✅ Logout Section */}
-    //   <div className="p-6 border-t border-gray-200 flex-shrink-0">
-    //     <button
-    //       onClick={() => {
-    //         logout();
-    //       }}
-    //       className={`flex items-center gap-3 text-gray-600 hover:text-red-500 transition-all duration-200`}
-    //     >
-    //       <FaSignOutAlt size={18} />
-    //       <span>Logout</span>
-    //     </button>
-    //   </div>
-    // </aside>
-
-
 
     <aside className="h-screen w-[240px] bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] border-r border-gray-200 dark:border-zinc-700 black:border-[#1f1f1f] shadow-sm flex flex-col">
 
-      {/* Logo Section */}
       <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-200 dark:border-zinc-700 black:border-[#1f1f1f] flex-shrink-0">
         <img src="/logo.png" alt="LMS Logo" className="w-9 h-9" />
         <h1 className="text-lg font-semibold text-gray-800 dark:text-zinc-100 black:text-white">
@@ -164,7 +118,6 @@ export default function Sidebar({ studentInfo }) {
         </h1>
       </div>
 
-      {/* Scrollable Menu */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
         <nav className="mt-4 flex flex-col gap-1 pb-6">
           {currentMenu.map((item, index) => (
@@ -186,7 +139,6 @@ export default function Sidebar({ studentInfo }) {
         </nav>
       </div>
 
-      {/* Logout Section */}
       <div className="p-6 border-t border-gray-200 dark:border-zinc-700 black:border-[#1f1f1f] flex-shrink-0">
         <button
           onClick={() => logout()}

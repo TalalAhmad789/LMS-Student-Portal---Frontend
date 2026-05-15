@@ -4,6 +4,7 @@ import Swal from 'sweetalert2'
 import { FaEye } from "react-icons/fa";
 import { MdDelete, MdLockReset } from "react-icons/md";
 import Footer from "./Footer";
+import { PiStudentFill } from "react-icons/pi";
 
 const Students = () => {
 
@@ -742,13 +743,19 @@ const Students = () => {
           </div>
         </div>
       </div >
-
+      <div className="w-full h-[3px] bg-[#ba7a4e]" />
       <div className="p-6 bg-gray-50 dark:bg-zinc-900 min-h-screen">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-100">Student Management</h1>
-          <p className="text-sm text-gray-500 dark:text-zinc-400">
-            Add, view, and manage all registered students in the system.
-          </p>
+          <div className="flex items-center gap-x-2 text-[#ba7a4e]">
+
+            <PiStudentFill size={50}/>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-100">Student Management</h1>
+              <p className="text-sm text-gray-500 dark:text-zinc-400">
+                Add, view, and manage all registered students in the system.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Stat Cards */}

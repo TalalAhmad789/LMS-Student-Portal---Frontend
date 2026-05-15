@@ -1,33 +1,67 @@
-import { useTheme } from "../hooks/useTheme";
-import { FaSun, FaMoon } from "react-icons/fa";
+import { useTheme } from "../contexts/ThemeContext";
+import { HiOutlineSun, HiOutlineMoon } from "react-icons/hi2";
 
 const ThemeToggle = () => {
-
     const { theme, setTheme } = useTheme();
 
+    const isDark = theme === "dark" || theme === "black";
+
+    const toggleTheme = () => {
+        setTheme(isDark ? "light" : "dark");
+    };
+
     return (
-        // <button
-        //     onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-        //     className="p-2 rounded-lg border"
-        // >
-        //     {theme === "dark" ? "🌙" : "☀️"}
-        // </button>
         <button
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="p-2.5 rounded-xl border border-gray-300 dark:border-gray-600 
-  bg-white dark:bg-gray-800 
-  shadow-sm hover:shadow-md
-  hover:bg-gray-100 dark:hover:bg-gray-700
-  transition-colors duration-200"
+            onClick={toggleTheme}
+            aria-label="Toggle Theme"
+            className={`
+                relative w-8 h-8 rounded-md
+                flex items-center justify-center
+                overflow-hidden
+                transition-all duration-500 ease-in-out
+                border shadow-lg
+                hover:scale-105 active:scale-95
+                ${isDark
+                    ? "bg-zinc-900 border-zinc-700"
+                    : "bg-white border-gray-200"
+                }
+            `}
         >
-            {theme === "dark" ? (
-                <FaMoon className="text-yellow-400 text-md" />
-            ) : (
-                <FaSun className="text-orange-500 text-md" />
-            )}
+            <div
+                className={`
+                    absolute inset-0 transition-all duration-500
+                    ${isDark
+                        ? "bg-gradient-to-br from-indigo-500/10 to-blue-500/10"
+                        : ""
+                    }
+                `}
+            />
+
+            <HiOutlineSun
+                size={18}
+                className={`
+                    absolute text-yellow-500
+                    transition-all duration-500 ease-in-out
+                    ${isDark
+                        ? "opacity-0 rotate-180 scale-0"
+                        : "opacity-100 rotate-0 scale-100"
+                    }
+                `}
+            />
+
+            <HiOutlineMoon
+                size={18}
+                className={`
+                    absolute text-blue-400
+                    transition-all duration-500 ease-in-out
+                    ${isDark
+                        ? "opacity-100 rotate-0 scale-100"
+                        : "opacity-0 -rotate-180 scale-0"
+                    }
+                `}
+            />
         </button>
-
     );
-}
+};
 
-export default ThemeToggle
+export default ThemeToggle;

@@ -24,6 +24,7 @@ import Settings from './components/Settings.jsx'
 import Admin from './components/Admin.jsx'
 import AttendanceMark from './components/AttendanceMark.jsx'
 import EditAttendance from './components/EditAttendance.jsx'
+import { ThemeProvider } from './contexts/ThemeContext.jsx'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -50,6 +51,7 @@ const router = createBrowserRouter(
 
 
       <Route path='/admin/dashboard' element={<Dashboard />} />
+      <Route path='/admin/profile' element={<Profile />} ></Route>
       <Route path='/admin/admins' element={<Admin />} />
       <Route path='/admin/students' element={<Students />} />
       <Route path='/admin/timetable' element={<Timetable />} />
@@ -66,7 +68,12 @@ const router = createBrowserRouter(
 )
 
 createRoot(document.getElementById('root')).render(
+
   <StrictMode>
-    <RouterProvider router={router} />
+    <ThemeProvider>
+      <RouterProvider router={router} />
+    </ThemeProvider>
   </StrictMode>,
+
+
 )
