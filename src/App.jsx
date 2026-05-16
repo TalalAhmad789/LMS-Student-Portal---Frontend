@@ -79,7 +79,7 @@ function App() {
   return (
     <div className="flex h-screen bg-[#f9fafb] dark:bg-gray-900 text-black dark:text-white">
 
-      {/* <Sidebar studentInfo={studentInfo} /> */}
+      <Sidebar studentInfo={studentInfo} />
 
       <div className="flex flex-col flex-1 overflow-hidden">
 

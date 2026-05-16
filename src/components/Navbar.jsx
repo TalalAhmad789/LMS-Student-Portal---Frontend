@@ -209,7 +209,7 @@ export default function Navbar({ studentInfo, adminInfo, teacherInfo }) {
                   GIGCCL
                 </h1>
                 <p className="text-gray-500 dark:text-zinc-400 black:text-[#555] hidden md:block text-sm">Admin Portal</p>
-                <p className="text-gray-500 dark:text-zinc-400 black:text-[#555] block md:hidden text-[10px]">Admin Portal</p>
+                <p className="text-gray-500 dark:text-zinc-400 black:text-[#555] block md:hidden text-[12px]">Admin Portal</p>
               </div>
             </div>
 
