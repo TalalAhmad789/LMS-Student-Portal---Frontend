@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { MdDelete } from "react-icons/md";
+import { FaBookOpen } from "react-icons/fa";
 
 
 const Course = () => {
@@ -228,240 +229,203 @@ const Course = () => {
 
     return (
         <>
-            <div className="p-6 bg-gray-50 dark:bg-zinc-900 black:bg-black min-h-screen">
-                <div className="mb-6">
-                    <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-100 black:text-white">🎓 Course Management</h1>
-                    <p className="text-sm text-gray-500 dark:text-zinc-400 black:text-[#555]">
-                        Add, view, and manage all course in the system.
-                    </p>
+            <div className="w-full h-[3px] bg-[#ba7a4e]" />
+            <div className="p-4 sm:p-6 bg-gray-50 dark:bg-zinc-900 black:bg-[#0a0a0a] min-h-screen">
+
+                <div className="flex items-center gap-3 mb-6">
+                    <span className="w-10 h-10 rounded-xl bg-[#ba7a4e]/10 border border-[#ba7a4e]/20 flex items-center justify-center text-[#ba7a4e] flex-shrink-0">
+                        <FaBookOpen size={22} />
+                    </span>
+                    <div>
+                        <h1 className="text-xl font-semibold text-gray-800 dark:text-zinc-100 black:text-white">Course Management</h1>
+                        <p className="text-sm text-gray-500 dark:text-zinc-400 black:text-[#888]">
+                            Add, view, and manage all courses in the system.
+                        </p>
+                    </div>
                 </div>
 
-                {/* Stat Card */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                    <div className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] rounded-xl shadow p-4 border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f]">
-                        <h3 className="text-sm text-gray-500 dark:text-zinc-400 black:text-[#555]">Total Courses</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+                    <div className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] rounded-xl p-3 border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f] shadow-sm">
+                        <p className="text-xs text-gray-500 dark:text-zinc-400 black:text-[#666] mb-1">Total</p>
                         <p className="text-2xl font-bold text-[#ba7a4e]">{totalCourses}</p>
                     </div>
                 </div>
 
-                {/* Add Course Form */}
-                <div className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] shadow-xl rounded-2xl p-8 mb-10 border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f]">
-                    <h2 className="text-2xl font-semibold text-gray-800 dark:text-zinc-100 black:text-white mb-6 flex items-center gap-2">
-                        <span className="text-[#ba7a4e] text-3xl">+</span> Add New Course
-                    </h2>
+                <div className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] rounded-2xl border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f] shadow-sm overflow-hidden mb-5">
+                    <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f]">
+                        <span className="w-7 h-7 rounded-lg bg-[#ba7a4e]/10 flex items-center justify-center text-[#ba7a4e] text-lg font-bold leading-none">+</span>
+                        <h2 className="text-sm font-medium text-gray-800 dark:text-zinc-100 black:text-white">Add New Course</h2>
+                    </div>
+                    <div className="p-5">
+                        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
 
-                    <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="courseCode" className="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444]">Course Code</label>
+                                <input
+                                    onChange={handleChange}
+                                    type="text"
+                                    id="courseCode"
+                                    name="courseCode"
+                                    value={course.courseCode}
+                                    placeholder="Enter course code"
+                                    className="h-[40px] px-3 text-sm border border-gray-200 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]/20 focus:border-[#ba7a4e] transition"
+                                />
+                                {errors.courseCode && <p className="text-red-500 text-xs">{errors.courseCode}</p>}
+                            </div>
 
-                        {/* Course Code */}
-                        <div className="flex flex-col">
-                            <label htmlFor="courseCode" className="text-sm font-medium text-gray-600 dark:text-zinc-400 black:text-[#777] mb-1">
-                                Course Code
-                            </label>
-                            <input
-                                onChange={handleChange}
-                                type="text"
-                                id="courseCode"
-                                name="courseCode"
-                                value={course.courseCode}
-                                placeholder="Enter Course Code"
-                                className="px-4 py-2.5 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] placeholder-gray-400 dark:placeholder-zinc-500 black:placeholder-[#444] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] focus:border-[#ba7a4e] transition"
-                            />
-                            {errors.courseCode && <p className="text-red-500 text-sm">{errors.courseCode}</p>}
-                        </div>
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="courseName" className="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444]">Course Name</label>
+                                <input
+                                    onChange={handleChange}
+                                    type="text"
+                                    id="courseName"
+                                    name="courseName"
+                                    value={course.courseName}
+                                    placeholder="Enter course name"
+                                    className="h-[40px] px-3 text-sm border border-gray-200 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]/20 focus:border-[#ba7a4e] transition"
+                                />
+                                {errors.courseName && <p className="text-red-500 text-xs">{errors.courseName}</p>}
+                            </div>
 
-                        {/* Course Name */}
-                        <div className="flex flex-col">
-                            <label htmlFor="courseName" className="text-sm font-medium text-gray-600 dark:text-zinc-400 black:text-[#777] mb-1">
-                                Course Name
-                            </label>
-                            <input
-                                onChange={handleChange}
-                                type="text"
-                                id="courseName"
-                                name="courseName"
-                                value={course.courseName}
-                                placeholder="Enter Course Name"
-                                className="px-4 py-2.5 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] placeholder-gray-400 dark:placeholder-zinc-500 black:placeholder-[#444] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] focus:border-[#ba7a4e] transition"
-                            />
-                            {errors.courseName && <p className="text-red-500 text-sm">{errors.courseName}</p>}
-                        </div>
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="degreeTitle" className="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444]">Degree Title</label>
+                                <select
+                                    onChange={handleChange}
+                                    id="degreeTitle"
+                                    name="degreeTitle"
+                                    value={course.degreeTitle}
+                                    className="h-[40px] px-3 text-sm border border-gray-200 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-white focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]/20 focus:border-[#ba7a4e] transition"
+                                >
+                                    <option value="">Select Program</option>
+                                    <option>CS</option><option>IT</option><option>PHY</option>
+                                    <option>CHEM</option><option>ISL</option><option>ENG</option>
+                                </select>
+                                {errors.degreeTitle && <p className="text-red-500 text-xs">{errors.degreeTitle}</p>}
+                            </div>
 
-                        {/* Degree Title */}
-                        <div className="flex flex-col">
-                            <label htmlFor="degreeTitle" className="text-sm font-medium text-gray-600 dark:text-zinc-400 black:text-[#777] mb-1">
-                                Degree Title
-                            </label>
-                            <select
-                                onChange={handleChange}
-                                id="degreeTitle"
-                                name="degreeTitle"
-                                value={course.degreeTitle}
-                                className="px-4 py-2.5 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] focus:border-[#ba7a4e] transition"
-                            >
-                                <option value="">Select Program</option>
-                                <option>BSCS</option>
-                                <option>BSIT</option>
-                                <option>BSPHY</option>
-                                <option>BSCHEM</option>
-                                <option>BSISL</option>
-                                <option>BSENG</option>
-                            </select>
-                            {errors.degreeTitle && <p className="text-red-500 text-sm">{errors.degreeTitle}</p>}
-                        </div>
+                            <div className="flex flex-col gap-1.5">
+                                <label htmlFor="semester" className="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444]">Semester</label>
+                                <select
+                                    onChange={handleChange}
+                                    id="semester"
+                                    name="semester"
+                                    value={course.semester}
+                                    className="h-[40px] px-3 text-sm border border-gray-200 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-white focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]/20 focus:border-[#ba7a4e] transition"
+                                >
+                                    <option value="">Select Semester</option>
+                                    {[1, 2, 3, 4, 5, 6, 7, 8].map(n => <option key={n}>{n}</option>)}
+                                </select>
+                                {errors.semester && <p className="text-red-500 text-xs">{errors.semester}</p>}
+                            </div>
 
-                        {/* Semester */}
-                        <div className="flex flex-col">
-                            <label htmlFor="semester" className="text-sm font-medium text-gray-600 dark:text-zinc-400 black:text-[#777] mb-1">
-                                Semester
-                            </label>
-                            <select
-                                onChange={handleChange}
-                                id="semester"
-                                name="semester"
-                                value={course.semester}
-                                className="px-4 py-2.5 border border-gray-300 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-white dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-[#e5e5e5] focus:outline-none focus:ring-2 focus:ring-[#ba7a4e] focus:border-[#ba7a4e] transition"
-                            >
-                                <option value="">Select Semester</option>
-                                <option>1</option>
-                                <option>2</option>
-                                <option>3</option>
-                                <option>4</option>
-                                <option>5</option>
-                                <option>6</option>
-                                <option>7</option>
-                                <option>8</option>
-                            </select>
-                            {errors.semester && <p className="text-red-500 text-sm">{errors.semester}</p>}
-                        </div>
-
-                        <div className="md:col-span-2 flex justify-end">
-                            <button
-                                type="submit"
-                                className="bg-[#ba7a4e] hover:bg-[#a06840] text-white font-medium px-6 py-2.5 rounded-lg shadow transition duration-200"
-                            >
-                                {loading ? "Loading..." : "Add Course"}
-                            </button>
-                        </div>
-                    </form>
+                            <div className="sm:col-span-2 lg:col-span-3 flex justify-end">
+                                <button
+                                    type="submit"
+                                    className="h-[40px] px-6 flex items-center gap-2 bg-[#ba7a4e] hover:bg-[#a06840] active:scale-[0.98] text-white text-sm font-medium rounded-lg shadow transition-all duration-150"
+                                >
+                                    {loading ? "Adding..." : "Add Course"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
 
-                <div className="bg-white dark:bg-zinc-800 shadow-md rounded-xl p-4 mb-6 border border-gray-100 dark:border-zinc-700">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-
+                <div className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] rounded-xl border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f] shadow-sm p-4 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                         <input
                             type="text"
                             value={filters.courseCode}
-                            onChange={(e) =>
-                                setFilters({ ...filters, courseCode: e.target.value })
-                            }
+                            onChange={(e) => setFilters({ ...filters, courseCode: e.target.value })}
                             placeholder="Course Code"
-                            className="px-4 py-3 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]"
+                            className="h-[40px] px-3 text-sm border border-gray-200 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]/20 focus:border-[#ba7a4e] transition"
                         />
-
                         <input
                             type="text"
                             value={filters.courseName}
-                            onChange={(e) =>
-                                setFilters({ ...filters, courseName: e.target.value })
-                            }
+                            onChange={(e) => setFilters({ ...filters, courseName: e.target.value })}
                             placeholder="Course Name"
-                            className="px-4 py-3 border border-gray-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-gray-800 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]"
+                            className="h-[40px] px-3 text-sm border border-gray-200 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]/20 focus:border-[#ba7a4e] transition"
                         />
-
                         <div className="flex gap-2">
-
                             <button
                                 onClick={handleFilter}
-                                className="flex-1 bg-[#ba7a4e] hover:bg-[#a86a3f] text-white font-medium rounded-lg px-4 py-3 transition"
+                                className="flex-1 h-[40px] bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
                             >
                                 {loading2 ? "Filtering..." : "Apply"}
                             </button>
-
                             <button
-                                onClick={() => {
-                                    setFilters({ courseCode: "", courseName: "" });
-                                    setFilteredCourses(courseList);
-                                    setCurrentPage(1);
-                                }}
-                                className="flex-1 bg-gray-200 dark:bg-zinc-600 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-zinc-500 font-medium rounded-lg px-4 py-3 transition"
+                                onClick={() => { setFilters({ courseCode: "", courseName: "" }); setFilteredCourses(courseList); setCurrentPage(1); }}
+                                className="flex-1 h-[40px] bg-gray-100 dark:bg-zinc-700 black:bg-[#1a1a1a] text-gray-700 dark:text-zinc-300 black:text-[#aaa] hover:bg-gray-200 dark:hover:bg-zinc-600 text-sm font-medium rounded-lg transition"
                             >
                                 Reset
                             </button>
-
                         </div>
-
                     </div>
-
                 </div>
 
-                {/* Course Table */}
-                <div className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] shadow-md rounded-xl overflow-x-auto border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f]">
-                    <table className="w-full text-left border-collapse">
-                        <thead>
-                            <tr className="bg-gray-100 dark:bg-zinc-700/60 black:bg-[#141414] text-gray-700 dark:text-zinc-300 black:text-[#555] text-sm uppercase tracking-wide">
-                                <th className="p-3">#</th>
-                                <th className="p-3">Course Code</th>
-                                <th className="p-3">Course Name</th>
-                                <th className="p-3">Degree Title</th>
-                                <th className="p-3">Semester</th>
-                                <th className="p-3">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {loading3 ? <tr>
-                                <td colSpan="6" className="text-center p-6 text-[#ba7a4e]">Loading...</td>
-                            </tr> : filteredCourses.length === 0 ? (
-                                <tr>
-                                    <td colSpan="6" className="text-center p-6 text-gray-400 dark:text-zinc-500 black:text-[#333]">
-                                        No Course Record
-                                    </td>
+                <div className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] rounded-xl border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f] shadow-sm overflow-hidden">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="bg-gray-50 dark:bg-zinc-700/50 black:bg-[#141414] border-b border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f]">
+                                    {["#", "Course Code", "Course Name", "Degree Title", "Semester", "Actions"].map(h => (
+                                        <th key={h} className="px-4 py-3 text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444] whitespace-nowrap">{h}</th>
+                                    ))}
                                 </tr>
-                            ) : (
-                                currentCourses.map((item, index) => (
-                                    <tr key={index} className="border-t border-gray-100 dark:border-zinc-700 black:border-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-zinc-700/40 black:hover:bg-[#141414] text-gray-800 dark:text-zinc-200 black:text-[#ccc] transition-colors">
-                                        <td className="p-3 text-gray-400 dark:text-zinc-500 black:text-[#3a3a3a]">{indexOfFirstCourse + index + 1}</td>
-                                        <td className="p-3 font-semibold text-[#ba7a4e]">{item.courseCode}</td>
-                                        <td className="p-3 font-medium">{item.courseName}</td>
-                                        <td className="p-3">{item.degreeTitle}</td>
-                                        <td className="p-3">{item.semester}</td>
-                                        <td className="p-3">
+                            </thead>
+                            <tbody>
+                                {loading3 ? (
+                                    <tr>
+                                        <td colSpan="6" className="text-center py-8 text-[#ba7a4e] text-sm">Loading...</td>
+                                    </tr>
+                                ) : filteredCourses.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" className="text-center py-10 text-gray-400 dark:text-zinc-600 black:text-[#333] text-sm">No course records found</td>
+                                    </tr>
+                                ) : currentCourses.map((item, index) => (
+                                    <tr key={index} className="border-t border-gray-50 dark:border-zinc-700/50 black:border-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-zinc-700/30 black:hover:bg-[#141414] transition-colors">
+                                        <td className="px-4 py-3 text-xs text-gray-400 dark:text-zinc-600 black:text-[#444]">{indexOfFirstCourse + index + 1}</td>
+                                        <td className="px-4 py-3 text-sm font-semibold text-[#ba7a4e]">{item.courseCode}</td>
+                                        <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-zinc-100 black:text-white whitespace-nowrap">{item.courseName}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-zinc-400 black:text-[#aaa]">{item.degreeTitle}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-600 dark:text-zinc-400 black:text-[#aaa]">{item.semester}</td>
+                                        <td className="px-4 py-3">
                                             <button
                                                 onClick={() => handleDelete(item._id)}
-                                                className="px-3 py-1 text-sm bg-red-500 hover:bg-red-600 dark:bg-red-500/20 dark:hover:bg-red-500/30 dark:text-red-400 black:bg-red-500/10 black:hover:bg-red-500/20 black:text-red-500 text-white rounded-lg transition"
+                                                className="w-8 h-8 flex items-center justify-center bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-500 dark:text-red-400 border border-red-100 dark:border-red-500/20 rounded-lg transition"
+                                                title="Delete"
                                             >
-                                                <MdDelete size={18} />
+                                                <MdDelete size={16} />
                                             </button>
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                    <div className="flex justify-between items-center mt-4">
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
+                    <div className="flex items-center justify-between px-4 py-3 border-t border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f]">
                         <button
                             onClick={() => setCurrentPage(currentPage - 1)}
                             disabled={currentPage === 1}
-                            className="px-4 py-2 bg-gray-200 dark:bg-zinc-700 rounded disabled:opacity-50"
+                            className="h-8 px-4 text-sm text-gray-600 dark:text-zinc-400 black:text-[#aaa] bg-gray-100 dark:bg-zinc-700 black:bg-[#1a1a1a] rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-600 disabled:opacity-40 disabled:cursor-not-allowed transition"
                         >
-                            Prev
+                            ← Prev
                         </button>
-
-                        <span className="text-gray-700 dark:text-zinc-300">
-                            Page {currentPage} of {totalPages}
+                        <span className="text-xs text-gray-500 dark:text-zinc-400 black:text-[#666]">
+                            Page <span className="font-medium text-gray-700 dark:text-zinc-300 black:text-[#aaa]">{currentPage}</span> of <span className="font-medium text-gray-700 dark:text-zinc-300 black:text-[#aaa]">{totalPages}</span>
                         </span>
-
                         <button
                             onClick={() => setCurrentPage(currentPage + 1)}
                             disabled={currentPage === totalPages}
-                            className="px-4 py-2 bg-gray-200 dark:bg-zinc-700 rounded disabled:opacity-50"
+                            className="h-8 px-4 text-sm text-gray-600 dark:text-zinc-400 black:text-[#aaa] bg-gray-100 dark:bg-zinc-700 black:bg-[#1a1a1a] rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-600 disabled:opacity-40 disabled:cursor-not-allowed transition"
                         >
-                            Next
+                            Next →
                         </button>
-
                     </div>
                 </div>
             </div>
+
         </>
     );
 };

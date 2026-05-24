@@ -360,6 +360,7 @@ const Students = () => {
         theme: isDark ? "dark" : "light"
       }).then(async (result) => {
         if (result.isConfirmed) {
+          await handleDelay(2)
           const response = await axios.post("/api/v1/admin/student/reset-password", { id: id }, { withCredentials: true });
           if (response?.data?.success) {
             await Swal.fire({
@@ -412,11 +413,11 @@ const Students = () => {
   ).length;
 
   const bscsStudents = studentList.filter(
-    (student) => student.degreeTitle === "BSCS"
+    (student) => student.degreeTitle === "CS"
   ).length;
 
   const bsitStudents = studentList.filter(
-    (student) => student.degreeTitle === "BSIT"
+    (student) => student.degreeTitle === "IT"
   ).length;
 
   const morningShiftStudents = studentList.filter(

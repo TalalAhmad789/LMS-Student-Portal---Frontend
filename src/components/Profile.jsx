@@ -187,7 +187,7 @@ function Profile() {
                                     </h1>
 
                                     <p className="text-sm text-gray-500 dark:text-zinc-400 black:text-[#888] mt-1">
-                                        {studentInfo?.degreeTitle || "—"}
+                                        {"BS"+studentInfo?.degreeTitle || "—"}
                                         {studentInfo?.shift && <> &nbsp;·&nbsp; {studentInfo.shift} Shift</>}
                                     </p>
 
@@ -300,7 +300,7 @@ function Profile() {
                                     </h1>
 
                                     <p className="text-sm text-gray-500 dark:text-zinc-400 black:text-[#888] mt-1">
-                                        {teacherInfo?.specification || "—"}
+                                        {"Department "+teacherInfo?.specification || "—"}
                                     </p>
 
                                     <div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-3">

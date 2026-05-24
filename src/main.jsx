@@ -45,6 +45,7 @@ const router = createBrowserRouter(
 
       <Route path='/teacher/dashboard' element={<Dashboard />} ></Route>
       <Route path='/teacher/profile' element={<Profile />} ></Route>
+      <Route path='/teacher/security' element={<Security />} ></Route>
       <Route path='/teacher/attendance' element={<Attendance />} ></Route>
       <Route path='/teacher/attendance/submit' element={<AttendanceMark />} ></Route>
       <Route path='/teacher/attendance/edit' element={<EditAttendance />} ></Route>
@@ -59,6 +60,7 @@ const router = createBrowserRouter(
       <Route path='/admin/applications' element={<Applications />} />
       <Route path='/admin/assignments' element={<Assignments />} />
       <Route path='/admin/teachers' element={<Teacher />} />
+      <Route path='/admin/security' element={<Security />} ></Route>
       <Route path='/admin/lecture' element={<Lecture />} />
       <Route path='/admin/course' element={<Course />} />
       <Route path='/admin/settings' element={<Settings />} />

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from 'axios'
+import { MdClass } from "react-icons/md";
+
 
 const Attendance = () => {
   const navigate = useNavigate()
@@ -22,60 +24,79 @@ const Attendance = () => {
   }, [])
 
   return (
-    <div className="p-6 max-w-6xl mx-auto bg-gray-50 dark:bg-zinc-900 black:bg-black min-h-screen">
-      <h2 className="text-2xl font-semibold text-gray-800 dark:text-zinc-100 black:text-white mb-8 flex items-center gap-2">
-        📚 Conducted Classes
-      </h2>
+   
+    <>
+  <div className="w-full h-[3px] bg-[#ba7a4e]" />
+  <div className="p-4 sm:p-6 bg-gray-50 dark:bg-zinc-900 black:bg-[#0a0a0a] min-h-screen">
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {lectureList.length > 0 ? lectureList.map((item, index) => (
+    <div className="flex items-center gap-3 mb-6">
+      <span className="w-10 h-10 rounded-xl bg-[#ba7a4e]/10 border border-[#ba7a4e]/20 flex items-center justify-center text-[#ba7a4e] flex-shrink-0">
+        <MdClass size={22} />
+      </span>
+      <div>
+        <h1 className="text-xl font-semibold text-gray-800 dark:text-zinc-100 black:text-white">Conducted Classes</h1>
+        <p className="text-sm text-gray-500 dark:text-zinc-400 black:text-[#888]">
+          View your assigned classes and manage their attendance.
+        </p>
+      </div>
+    </div>
+
+    {lectureList.length > 0 ? (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {lectureList.map((item, index) => (
           <div
             key={index}
-            className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] rounded-2xl shadow-md p-6 border-t-4 border-[#ba7a4e] hover:shadow-lg transition-all duration-200 border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f]"
+            className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] rounded-2xl border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f] shadow-sm overflow-hidden hover:shadow-md transition-all duration-200"
           >
-            <h3 className="text-lg font-semibold text-[#ba7a4e] mb-2">
-              {item.degreeTitle}
-            </h3>
-            <ul className="text-gray-700 dark:text-zinc-300 black:text-[#aaa] space-y-1 text-sm mb-4">
-              <li>
-                <span className="font-medium text-gray-800 dark:text-zinc-200 black:text-[#ccc]">Class Section:</span>{" "}
-                {item.section}
-              </li>
-              <li>
-                <span className="font-medium text-gray-800 dark:text-zinc-200 black:text-[#ccc]">Course Code:</span>{" "}
-                {item.courseCode}
-              </li>
-              <li>
-                <span className="font-medium text-gray-800 dark:text-zinc-200 black:text-[#ccc]">Shift:</span> {item.shift}
-              </li>
-              <li>
-                <span className="font-medium text-gray-800 dark:text-zinc-200 black:text-[#ccc]">Semester:</span> {item.semester}
-              </li>
-            </ul>
-            <div className="space-y-2">
+            <div className="h-[3px] bg-[#ba7a4e]" />
+            <div className="px-5 py-4 border-b border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f]">
+              <div className="flex items-center gap-2">
+                <span className="w-7 h-7 rounded-lg bg-[#ba7a4e]/10 flex items-center justify-center text-[#ba7a4e] flex-shrink-0">
+                  <MdClass size={15} />
+                </span>
+                <h3 className="text-sm font-semibold text-[#ba7a4e] truncate">{item.degreeTitle}</h3>
+              </div>
+            </div>
+
+            <div className="px-5 py-4 space-y-2">
+              {[
+                { label: "Course Code", value: item.courseCode },
+                { label: "Section", value: item.section },
+                { label: "Semester", value: item.semester },
+                { label: "Shift", value: item.shift },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex items-center justify-between">
+                  <span className="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444]">{label}</span>
+                  <span className="text-sm text-gray-700 dark:text-zinc-200 black:text-[#ccc] font-medium">{value}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="px-5 pb-5 flex flex-col gap-2">
               <button
-                onClick={() => {
-                  navigate(`/teacher/attendance/submit?degree=${item.degreeTitle}&section=${item.section}&shift=${item.shift}&courseCode=${item.courseCode}&semester=${item.semester}`)
-                }}
-                className="w-full bg-[#ba7a4e] hover:bg-[#a06840] text-white py-2 rounded-lg shadow transition-all"
+                onClick={() => navigate(`/teacher/attendance/submit?degree=${item.degreeTitle}&section=${item.section}&shift=${item.shift}&courseCode=${item.courseCode}&semester=${item.semester}`)}
+                className="w-full h-[38px] flex items-center justify-center bg-[#ba7a4e] hover:bg-[#a06840] active:scale-[0.98] text-white text-sm font-medium rounded-lg shadow-sm transition-all duration-150"
               >
                 Add Attendance
               </button>
               <button
-                onClick={() => {
-                  navigate(`/teacher/attendance/edit?degree=${item.degreeTitle}&section=${item.section}&shift=${item.shift}&courseCode=${item.courseCode}&semester=${item.semester}`)
-                }}
-                className="w-full bg-[#eb435c] hover:bg-red-700 dark:bg-red-500/20 dark:hover:bg-red-500/30 dark:text-red-400 black:bg-red-500/10 black:hover:bg-red-500/20 black:text-red-400 text-white py-2 rounded-lg shadow transition-all"
+                onClick={() => navigate(`/teacher/attendance/edit?degree=${item.degreeTitle}&section=${item.section}&shift=${item.shift}&courseCode=${item.courseCode}&semester=${item.semester}`)}
+                className="w-full h-[38px] flex items-center justify-center bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-500/20 text-sm font-medium rounded-lg transition-all duration-150"
               >
                 Edit Attendance
               </button>
             </div>
           </div>
-        )) : (
-          <div className="font-semibold text-gray-500 dark:text-zinc-500 black:text-[#444]">No Class found</div>
-        )}
+        ))}
       </div>
-    </div>
+    ) : (
+      <div className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] rounded-xl border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f] shadow-sm">
+        <p className="text-center py-10 text-gray-400 dark:text-zinc-600 black:text-[#333] text-sm">No classes found</p>
+      </div>
+    )}
+  </div>
+
+</>
   )
 }
 

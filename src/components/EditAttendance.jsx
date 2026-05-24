@@ -37,26 +37,28 @@ const EditAttendance = () => {
 
 
     return (
-        // <div className="p-6 max-w-6xl mx-auto">
+        // <div className="p-6 max-w-6xl mx-auto bg-gray-50 dark:bg-zinc-900 black:bg-black min-h-screen">
 
         //     {/* Header */}
         //     <div className="mb-6">
-        //         <h1 className="text-2xl font-bold text-gray-800">
+        //         <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-100 black:text-white">
         //             📅 Edit Attendance
         //         </h1>
-        //         <p className="text-sm text-gray-500">
+        //         <p className="text-sm text-gray-500 dark:text-zinc-400 black:text-[#555]">
         //             View and update attendance records easily.
         //         </p>
         //     </div>
 
         //     {/* Table Card */}
-        //     <div className="bg-white shadow-xl rounded-2xl overflow-hidden border border-gray-100">
+        //     <div className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] shadow-xl rounded-2xl overflow-x-auto border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f]">
+
+
 
         //         <table className="w-full text-left border-collapse">
 
         //             {/* Table Head */}
         //             <thead>
-        //                 <tr className="bg-gray-100 text-gray-700 text-sm uppercase">
+        //                 <tr className="bg-gray-100 dark:bg-zinc-700/60 black:bg-[#141414] text-gray-700 dark:text-zinc-300 black:text-[#555] text-sm uppercase tracking-wide">
         //                     <th className="p-4">Date</th>
         //                     <th className="p-4">Time</th>
         //                     <th className="p-4">Attendance</th>
@@ -68,7 +70,7 @@ const EditAttendance = () => {
         //             <tbody>
         //                 {attendance.length === 0 ? (
         //                     <tr>
-        //                         <td colSpan="3" className="text-center p-6 text-gray-500">
+        //                         <td colSpan="4" className="text-center p-6 text-gray-400 dark:text-zinc-500 black:text-[#333]">
         //                             No Attendance Found
         //                         </td>
         //                     </tr>
@@ -76,22 +78,27 @@ const EditAttendance = () => {
         //                     attendance.map((item, index) => (
         //                         <tr
         //                             key={index}
-        //                             className="border-t hover:bg-gray-50 transition"
+        //                             className="border-t border-gray-100 dark:border-zinc-700 black:border-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-zinc-700/40 black:hover:bg-[#141414] transition-colors"
         //                         >
-
         //                             {/* Date */}
-        //                             <td className="p-4 font-medium text-gray-800">
+        //                             <td className="p-4 font-semibold text-[#ba7a4e]">
         //                                 {item.date}
         //                             </td>
 
         //                             {/* Time */}
-        //                             <td className="p-4 font-medium text-gray-800">
+        //                             <td className="p-4 font-medium text-gray-800 dark:text-zinc-200 black:text-[#ccc]">
         //                                 {item.time}
         //                             </td>
 
-        //                             {/* Attendance */}
+        //                             {/* Attendance Badge */}
         //                             <td className="p-4">
-        //                                 <span className="px-3 py-1 rounded-full text-sm font-semibold bg-yellow-100 text-yellow-800">
+        //                                 <span className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wide
+        //               ${item.Attendance === "Present"
+        //                                         ? "bg-green-100 dark:bg-green-400/10 black:bg-green-500/10 text-green-700 dark:text-green-400 black:text-green-500"
+        //                                         : item.Attendance === "Absent"
+        //                                             ? "bg-red-100 dark:bg-red-400/10 black:bg-red-500/10 text-red-600 dark:text-red-400 black:text-red-500"
+        //                                             : "bg-yellow-100 dark:bg-yellow-400/10 black:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 black:text-yellow-500"
+        //                                     }`}>
         //                                     {item.Attendance}
         //                                 </span>
         //                             </td>
@@ -102,7 +109,7 @@ const EditAttendance = () => {
         //                                     onClick={() => {
         //                                         navigate(`/teacher/attendance/submit?degree=${degree}&section=${section}&shift=${shift}&courseCode=${courseCode}&semester=${semester}&lectureAttendanceId=${item?.lectureAttendanceId}`)
         //                                     }}
-        //                                     className="flex items-center gap-2 mx-auto bg-[#925fe2] text-white px-4 py-2 rounded-lg shadow hover:bg-purple-700 transition">
+        //                                     className="flex items-center gap-2 mx-auto bg-[#ba7a4e] hover:bg-[#a06840] text-white px-4 py-2 rounded-lg shadow transition">
         //                                     <FaEdit />
         //                                     Edit
         //                                 </button>
@@ -116,92 +123,83 @@ const EditAttendance = () => {
         //         </table>
         //     </div>
         // </div>
-        <div className="p-6 max-w-6xl mx-auto bg-gray-50 dark:bg-zinc-900 black:bg-black min-h-screen">
+        <>
+  {/* ── Page ── */}
+  <div className="w-full h-[3px] bg-[#ba7a4e]" />
+  <div className="p-4 sm:p-6 bg-gray-50 dark:bg-zinc-900 black:bg-[#0a0a0a] min-h-screen">
 
-            {/* Header */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-800 dark:text-zinc-100 black:text-white">
-                    📅 Edit Attendance
-                </h1>
-                <p className="text-sm text-gray-500 dark:text-zinc-400 black:text-[#555]">
-                    View and update attendance records easily.
-                </p>
-            </div>
+    {/* Header */}
+    <div className="flex items-center gap-3 mb-6">
+      <span className="w-10 h-10 rounded-xl bg-[#ba7a4e]/10 border border-[#ba7a4e]/20 flex items-center justify-center text-[#ba7a4e] flex-shrink-0">
+        <FaEdit size={18} />
+      </span>
+      <div>
+        <h1 className="text-xl font-semibold text-gray-800 dark:text-zinc-100 black:text-white">Edit Attendance</h1>
+        <p className="text-sm text-gray-500 dark:text-zinc-400 black:text-[#888]">
+          View and update attendance records easily.
+        </p>
+      </div>
+    </div>
 
-            {/* Table Card */}
-            <div className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] shadow-xl rounded-2xl overflow-x-auto border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f]">
+    {/* Table */}
+    <div className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] rounded-xl border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f] shadow-sm overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full text-left">
+          <thead>
+            <tr className="bg-gray-50 dark:bg-zinc-700/50 black:bg-[#141414] border-b border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f]">
+              {["Date", "Time", "Attendance", "Action"].map(h => (
+                <th key={h} className={`px-4 py-3 text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444] whitespace-nowrap ${h === "Action" ? "text-center" : ""}`}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {attendance.length === 0 ? (
+              <tr>
+                <td colSpan="4" className="text-center py-10 text-gray-400 dark:text-zinc-600 black:text-[#333] text-sm">No attendance records found</td>
+              </tr>
+            ) : attendance.map((item, index) => (
+              <tr key={index} className="border-t border-gray-50 dark:border-zinc-700/50 black:border-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-zinc-700/30 black:hover:bg-[#141414] transition-colors">
 
+                <td className="px-4 py-3 text-sm font-semibold text-[#ba7a4e]">{item.date}</td>
 
+                <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-zinc-100 black:text-white">{item.time}</td>
 
-                <table className="w-full text-left border-collapse">
+                <td className="px-4 py-3">
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium ${
+                    item.Attendance === "Present"
+                      ? "bg-green-50 dark:bg-green-400/10 text-green-700 dark:text-green-400"
+                      : item.Attendance === "Absent"
+                        ? "bg-red-50 dark:bg-red-400/10 text-red-600 dark:text-red-400"
+                        : "bg-yellow-50 dark:bg-yellow-400/10 text-yellow-700 dark:text-yellow-400"
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${
+                      item.Attendance === "Present" ? "bg-green-500"
+                        : item.Attendance === "Absent" ? "bg-red-500"
+                        : "bg-yellow-500"
+                    }`} />
+                    {item.Attendance}
+                  </span>
+                </td>
 
-                    {/* Table Head */}
-                    <thead>
-                        <tr className="bg-gray-100 dark:bg-zinc-700/60 black:bg-[#141414] text-gray-700 dark:text-zinc-300 black:text-[#555] text-sm uppercase tracking-wide">
-                            <th className="p-4">Date</th>
-                            <th className="p-4">Time</th>
-                            <th className="p-4">Attendance</th>
-                            <th className="p-4 text-center">Action</th>
-                        </tr>
-                    </thead>
+                <td className="px-4 py-3 text-center">
+                  <button
+                    onClick={() => navigate(`/teacher/attendance/submit?degree=${degree}&section=${section}&shift=${shift}&courseCode=${courseCode}&semester=${semester}&lectureAttendanceId=${item?.lectureAttendanceId}`)}
+                    className="inline-flex items-center gap-1.5 h-8 px-3 bg-[#ba7a4e] hover:bg-[#a06840] active:scale-[0.98] text-white text-xs font-medium rounded-lg shadow-sm transition-all duration-150"
+                  >
+                    <FaEdit  size={12} />
+                    Edit
+                  </button>
+                </td>
 
-                    {/* Table Body */}
-                    <tbody>
-                        {attendance.length === 0 ? (
-                            <tr>
-                                <td colSpan="4" className="text-center p-6 text-gray-400 dark:text-zinc-500 black:text-[#333]">
-                                    No Attendance Found
-                                </td>
-                            </tr>
-                        ) : (
-                            attendance.map((item, index) => (
-                                <tr
-                                    key={index}
-                                    className="border-t border-gray-100 dark:border-zinc-700 black:border-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-zinc-700/40 black:hover:bg-[#141414] transition-colors"
-                                >
-                                    {/* Date */}
-                                    <td className="p-4 font-semibold text-[#ba7a4e]">
-                                        {item.date}
-                                    </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 
-                                    {/* Time */}
-                                    <td className="p-4 font-medium text-gray-800 dark:text-zinc-200 black:text-[#ccc]">
-                                        {item.time}
-                                    </td>
-
-                                    {/* Attendance Badge */}
-                                    <td className="p-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wide
-                      ${item.Attendance === "Present"
-                                                ? "bg-green-100 dark:bg-green-400/10 black:bg-green-500/10 text-green-700 dark:text-green-400 black:text-green-500"
-                                                : item.Attendance === "Absent"
-                                                    ? "bg-red-100 dark:bg-red-400/10 black:bg-red-500/10 text-red-600 dark:text-red-400 black:text-red-500"
-                                                    : "bg-yellow-100 dark:bg-yellow-400/10 black:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 black:text-yellow-500"
-                                            }`}>
-                                            {item.Attendance}
-                                        </span>
-                                    </td>
-
-                                    {/* Edit Button */}
-                                    <td className="p-4 text-center">
-                                        <button
-                                            onClick={() => {
-                                                navigate(`/teacher/attendance/submit?degree=${degree}&section=${section}&shift=${shift}&courseCode=${courseCode}&semester=${semester}&lectureAttendanceId=${item?.lectureAttendanceId}`)
-                                            }}
-                                            className="flex items-center gap-2 mx-auto bg-[#ba7a4e] hover:bg-[#a06840] text-white px-4 py-2 rounded-lg shadow transition">
-                                            <FaEdit />
-                                            Edit
-                                        </button>
-                                    </td>
-
-                                </tr>
-                            ))
-                        )}
-                    </tbody>
-
-                </table>
-            </div>
-        </div>
+</>
     );
 };
 

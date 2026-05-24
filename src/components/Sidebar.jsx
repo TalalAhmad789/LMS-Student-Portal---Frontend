@@ -27,14 +27,13 @@ import {
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
-export default function Sidebar({ studentInfo }) {
+export default function Sidebar({ studentInfo, adminInfo }) {
 
   const location = useLocation();
   const navigate = useNavigate();
   const currentRoute = location.pathname.split("/")[1];
 
 
-  // ---- MENU ITEMS ----
   const menuItems = {
     student: [
       { name: "Dashboard", icon: <FaHome size={18} />, path: "/student/dashboard" },
@@ -51,7 +50,7 @@ export default function Sidebar({ studentInfo }) {
       { name: "Dashboard", icon: <FaHome size={18} />, path: "/admin/dashboard" },
       { name: "Students", icon: <FaUserGraduate size={18} />, path: "/admin/students" },
       { name: "Teachers", icon: <FaChalkboardTeacher size={18} />, path: "/admin/teachers" },
-      { name: "Admins", icon: <MdGroups size={18} />, path: "/admin/admins" },
+      ...(adminInfo?.isSuperAdmin ? [{ name: "Admins", icon: <MdGroups size={18} />, path: "/admin/admins" }] : []),
       { name: "Lecture", icon: <MdOutlineClass size={18} />, path: "/admin/lecture" },
       { name: "Course", icon: <FaBookOpen size={18} />, path: "/admin/course" },
       { name: "Applications", icon: <FaWpforms size={18} />, path: "/admin/applications" },

@@ -319,6 +319,7 @@ const Teacher = () => {
                 theme: isDark ? "dark" : "light"
             }).then(async (result) => {
                 if (result.isConfirmed) {
+                    await handleDelay(2)
                     const response = await axios.post("/api/v1/admin/teacher/reset-password", { id: id }, { withCredentials: true });
                     if (response?.data?.success) {
                         await Swal.fire({

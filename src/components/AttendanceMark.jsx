@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom"
 import Swal from 'sweetalert2'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { v4 as uuidv4 } from "uuid";
+import { MdChecklist } from "react-icons/md";
 
 const AttendanceMark = () => {
 
@@ -203,85 +204,90 @@ const AttendanceMark = () => {
 
 
     return (
-        <div className="min-h-screen bg-gray-100 dark:bg-zinc-900 black:bg-black flex flex-col items-center py-10 px-4">
+        <>
+            <div className="w-full h-[3px] bg-[#ba7a4e]" />
+            <div className="p-4 sm:p-6 bg-gray-50 dark:bg-zinc-900 black:bg-[#0a0a0a] min-h-screen">
 
-            <h1 className="text-3xl font-bold mb-6 text-gray-800 dark:text-zinc-100 black:text-white">
-                Student Attendance
-            </h1>
-
-            {/* Stat Cards */}
-            <div className="flex flex-wrap gap-16 justify-center mb-8">
-                <div className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] shadow-md rounded-xl p-4 w-48 text-center border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f]">
-                    <h2 className="text-lg font-semibold text-gray-600 dark:text-zinc-400 black:text-[#555]">
-                        Total Students
-                    </h2>
-                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400 black:text-blue-500">{total}</p>
+                <div className="flex items-center gap-3 mb-6">
+                    <span className="w-10 h-10 rounded-xl bg-[#ba7a4e]/10 border border-[#ba7a4e]/20 flex items-center justify-center text-[#ba7a4e] flex-shrink-0">
+                        <MdChecklist size={22} />
+                    </span>
+                    <div>
+                        <h1 className="text-xl font-semibold text-gray-800 dark:text-zinc-100 black:text-white">Student Attendance</h1>
+                        <p className="text-sm text-gray-500 dark:text-zinc-400 black:text-[#888]">
+                            Mark and manage student attendance for the current lecture.
+                        </p>
+                    </div>
                 </div>
 
-                <div className="bg-green-100 dark:bg-green-400/10 black:bg-green-500/10 shadow-md rounded-xl p-4 w-48 text-center border border-transparent dark:border-green-400/20 black:border-green-500/20">
-                    <h2 className="text-lg font-semibold text-gray-600 dark:text-zinc-400 black:text-[#555]">Present</h2>
-                    <p className="text-2xl font-bold text-green-600 dark:text-green-400 black:text-green-500">{present}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                    {[
+                        { label: "Total", value: total, color: "text-[#ba7a4e]" },
+                        { label: "Present", value: present, color: "text-green-600 dark:text-green-400" },
+                        { label: "Leave", value: leave, color: "text-yellow-600 dark:text-yellow-400" },
+                        { label: "Absent", value: absent, color: "text-red-600 dark:text-red-400" },
+                    ].map(({ label, value, color }) => (
+                        <div key={label} className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] rounded-xl p-3 border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f] shadow-sm">
+                            <p className="text-xs text-gray-500 dark:text-zinc-400 black:text-[#666] mb-1">{label}</p>
+                            <p className={`text-2xl font-bold ${color}`}>{value}</p>
+                        </div>
+                    ))}
                 </div>
 
-                <div className="bg-yellow-100 dark:bg-yellow-400/10 black:bg-yellow-500/10 shadow-md rounded-xl p-4 w-48 text-center border border-transparent dark:border-yellow-400/20 black:border-yellow-500/20">
-                    <h2 className="text-lg font-semibold text-gray-600 dark:text-zinc-400 black:text-[#555]">Leave</h2>
-                    <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 black:text-yellow-500">{leave}</p>
+                <div className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] rounded-xl border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f] shadow-sm overflow-hidden mb-5">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left">
+                            <thead>
+                                <tr className="bg-gray-50 dark:bg-zinc-700/50 black:bg-[#141414] border-b border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f]">
+                                    {["Roll No", "Name", "Attendance"].map(h => (
+                                        <th key={h} className={`px-4 py-3 text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444] whitespace-nowrap ${h === "Attendance" ? "text-center" : ""}`}>{h}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {studentsData.length > 0 ? studentsData.map((s, index) => (
+                                    <tr key={index} className="border-t border-gray-50 dark:border-zinc-700/50 black:border-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-zinc-700/30 black:hover:bg-[#141414] transition-colors">
+                                        <td className="px-4 py-3 text-sm font-semibold text-[#ba7a4e]">{s.collegeRollNo}</td>
+                                        <td className="px-4 py-3 text-sm font-medium text-gray-800 dark:text-zinc-100 black:text-white">{s.fullName}</td>
+                                        <td className="px-4 py-3 text-center">
+                                            <button
+                                                onClick={() => toggleAttendance(s.collegeRollNo)}
+                                                className={`inline-flex items-center justify-center w-28 h-8 rounded-lg text-xs font-semibold transition-all ${s.attendance === "Present"
+                                                    ? "bg-green-50 dark:bg-green-400/10 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-400/20 hover:bg-green-100 dark:hover:bg-green-400/20"
+                                                    : s.attendance === "Absent"
+                                                        ? "bg-red-50 dark:bg-red-400/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-400/20 hover:bg-red-100 dark:hover:bg-red-400/20"
+                                                        : "bg-yellow-50 dark:bg-yellow-400/10 text-yellow-700 dark:text-yellow-400 border border-yellow-200 dark:border-yellow-400/20 hover:bg-yellow-100 dark:hover:bg-yellow-400/20"
+                                                    }`}
+                                            >
+                                                <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${s.attendance === "Present" ? "bg-green-500"
+                                                    : s.attendance === "Absent" ? "bg-red-500"
+                                                        : "bg-yellow-500"
+                                                    }`} />
+                                                {s.attendance}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan="3" className="text-center py-10 text-gray-400 dark:text-zinc-600 black:text-[#333] text-sm">No records found</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <div className="bg-red-100 dark:bg-red-400/10 black:bg-red-500/10 shadow-md rounded-xl p-4 w-48 text-center border border-transparent dark:border-red-400/20 black:border-red-500/20">
-                    <h2 className="text-lg font-semibold text-gray-600 dark:text-zinc-400 black:text-[#555]">Absent</h2>
-                    <p className="text-2xl font-bold text-red-600 dark:text-red-400 black:text-red-500">{absent}</p>
+                <div className="flex justify-end">
+                    <button
+                        onClick={lectureAttendanceId === null ? handleSubmit : handleUpdate}
+                        className="h-[42px] px-8 flex items-center gap-2 bg-[#ba7a4e] hover:bg-[#a06840] active:scale-[0.98] text-white text-sm font-medium rounded-lg shadow transition-all duration-150"
+                    >
+                        {loading ? "Saving..." : "Submit Attendance"}
+                    </button>
                 </div>
             </div>
 
-            {/* Attendance Table */}
-            <div className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] shadow-lg rounded-2xl w-[70vw] p-6 border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f]">
-                <table className="w-full border-collapse">
-                    <thead>
-                        <tr className="bg-gray-200 dark:bg-zinc-700/60 black:bg-[#141414] text-gray-700 dark:text-zinc-300 black:text-[#555] text-sm uppercase tracking-wide text-left">
-                            <th className="p-3 rounded-tl-lg">Roll No</th>
-                            <th className="p-3">Name</th>
-                            <th className="p-3 rounded-tr-lg text-center">Attendance</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {studentsData.length > 0 ? studentsData.map((s, index) => (
-                            <tr key={index} className="border-b border-gray-100 dark:border-zinc-700 black:border-[#1a1a1a] hover:bg-gray-50 dark:hover:bg-zinc-700/40 black:hover:bg-[#141414] transition-colors">
-                                <td className="p-3 font-semibold text-[#ba7a4e]">{s.collegeRollNo}</td>
-                                <td className="p-3 font-medium text-gray-800 dark:text-zinc-200 black:text-[#ccc]">{s.fullName}</td>
-                                <td className="p-3 text-center">
-                                    <button
-                                        onClick={() => toggleAttendance(s.collegeRollNo)}
-                                        className={`text-white px-4 py-2 w-32 rounded-lg font-semibold transition-all ${s.attendance === "Present"
-                                            ? "bg-green-400 hover:bg-green-500 dark:bg-green-500/30 dark:hover:bg-green-500/50 dark:text-green-300 black:bg-green-500/20 black:hover:bg-green-500/40 black:text-green-400"
-                                            : s.attendance === "Absent"
-                                                ? "bg-red-400 hover:bg-red-500 dark:bg-red-500/30 dark:hover:bg-red-500/50 dark:text-red-300 black:bg-red-500/20 black:hover:bg-red-500/40 black:text-red-400"
-                                                : "bg-yellow-400 hover:bg-yellow-500 dark:bg-yellow-500/30 dark:hover:bg-yellow-500/50 dark:text-yellow-300 black:bg-yellow-500/20 black:hover:bg-yellow-500/40 black:text-yellow-400"
-                                            }`}
-                                    >
-                                        {s.attendance}
-                                    </button>
-                                </td>
-                            </tr>
-                        )) : (
-                            <tr className="border-b border-gray-100 dark:border-zinc-700 black:border-[#1a1a1a]">
-                                <td className="text-center"></td>
-                                <td className="text-center py-4 text-gray-400 dark:text-zinc-500 black:text-[#333]">No record found!!!</td>
-                                <td className="text-center"></td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Submit Button */}
-            <button
-                onClick={lectureAttendanceId === null ? handleSubmit : handleUpdate}
-                className="mt-8 bg-[#ba7a4e] hover:bg-[#a06840] text-white px-6 py-3 rounded-xl font-semibold transition-all shadow"
-            >
-                {loading ? "Loading..." : "Submit Attendance"}
-            </button>
-        </div>
+        </>
     )
 }
 

@@ -1,10 +1,36 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import Swal from "sweetalert2";
 import { FiLock, FiKey } from "react-icons/fi";
 import { HiOutlineKey, HiOutlineShieldCheck } from "react-icons/hi2";
+import { useLocation } from 'react-router-dom'
 
 const Security = () => {
+
+   const getTheme = () => {
+      if (document.documentElement.classList.contains("dark")) return "dark";
+      return "light";
+    };
+  
+    const [theme, setTheme] = useState(getTheme);
+  
+    useEffect(() => {
+      const observer = new MutationObserver(() => {
+        setTheme(getTheme());
+      });
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+      return () => observer.disconnect();
+    }, []);
+  
+    const isDark = theme === "dark";
+
+
+  const route = useLocation()
+  const currentRoute = route.pathname.split("/")[1]
+  const userType = currentRoute === "admin" ? "admin" : currentRoute === "student" ? "student" : "teacher";
 
   const [password, setPassword] = useState({
     current_password: "",
@@ -69,26 +95,31 @@ const Security = () => {
     setLoading(true);
     await handleDelay(3);
     try {
-      const response = await axios.post("/api/v1/students/change-password", password, {
+      const response = await axios.post(userType === "admin" ? `/api/v1/${userType}/change-password` : `/api/v1/${userType}s/change-password`, password, {
         withCredentials: true
       });
 
-      Swal.fire({
-        title: response?.data?.message,
-        icon: "success",
-        draggable: true
-      });
+      if (response?.data?.success) {
+        Swal.fire({
+          title: response?.data?.message,
+          icon: "success",
+          draggable: true,
+          theme: isDark ? "dark" : "light"
+        });
 
-      setPassword({
-        current_password: "",
-        new_password: "",
-        retype_password: ""
-      });
+        setPassword({
+          current_password: "",
+          new_password: "",
+          retype_password: ""
+        });
+      }
+
     } catch (error) {
       Swal.fire({
         title: error?.response?.data?.message,
         icon: "error",
-        draggable: true
+        draggable: true,
+        theme: isDark ? "dark" : "light"
       });
     } finally {
       setLoading(false);
