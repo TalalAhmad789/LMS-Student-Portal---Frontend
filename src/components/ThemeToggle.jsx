@@ -11,31 +11,8 @@ const ThemeToggle = () => {
     };
 
     return (
-        <button
-            onClick={toggleTheme}
-            aria-label="Toggle Theme"
-            className={`
-                relative w-8 h-8 rounded-md
-                flex items-center justify-center
-                overflow-hidden
-                transition-all duration-500 ease-in-out
-                border shadow-lg
-                hover:scale-105 active:scale-95
-                ${isDark
-                    ? "bg-zinc-900 border-zinc-700"
-                    : "bg-white border-gray-200"
-                }
-            `}
-        >
-            <div
-                className={`
-                    absolute inset-0 transition-all duration-500
-                    ${isDark
-                        ? "bg-gradient-to-br from-indigo-500/10 to-blue-500/10"
-                        : ""
-                    }
-                `}
-            />
+        <button onClick={toggleTheme} aria-label="Toggle Theme" className={`relative w-8 h-8 rounded-md flex items-center justify-center overflow-hidden transition-all duration-500 ease-in-out border shadow-lg hover:scale-105 active:scale-95 ${isDark ? "bg-zinc-900 border-zinc-700" : "bg-white border-gray-200"}`}>
+            <div className={`absolute inset-0 transition-all duration-500 ${isDark ? "bg-gradient-to-br from-indigo-500/10 to-blue-500/10" : ""} `} />
 
             <HiOutlineSun
                 size={18}

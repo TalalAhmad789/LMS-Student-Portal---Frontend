@@ -416,7 +416,7 @@ const Teacher = () => {
                                 <select onChange={handleChange} id="specification" name="specification" value={teacherDetails.specification}
                                     className="h-[40px] px-3 text-sm border border-gray-200 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-white focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]/20 focus:border-[#ba7a4e] transition">
                                     <option value="">Select Specification</option>
-                                    <option>CS</option><option>IT</option><option>PHY</option><option>CHEM</option><option>ISL</option><option>ENG</option>
+                                    <option>CS</option><option>IT</option><option>PHY</option><option>CHEM</option><option>ISL</option><option>ENG</option><option>Other</option>
                                 </select>
                             </div>
 
@@ -525,7 +525,7 @@ const Teacher = () => {
                                 <select onChange={handleChange} id="specification" name="specification" value={teacherform.specification}
                                     className="h-[40px] px-3 text-sm border border-gray-200 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-white focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]/20 focus:border-[#ba7a4e] transition">
                                     <option value="">Select Specification</option>
-                                    <option>CS</option><option>IT</option><option>PHY</option><option>CHEM</option><option>ISL</option><option>ENG</option>
+                                    <option>CS</option><option>IT</option><option>PHY</option><option>CHEM</option><option>ISL</option><option>ENG</option><option>Other</option>
                                 </select>
                                 {errors.specification && <p className="text-red-500 text-xs">{errors.specification}</p>}
                             </div>

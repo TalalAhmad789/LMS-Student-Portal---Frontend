@@ -24,6 +24,7 @@ import {
   MdOutlineMail,
   MdEventNote,
 } from "react-icons/md";
+import { GrAnnounce } from "react-icons/gr";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
@@ -53,6 +54,7 @@ export default function Sidebar({ studentInfo, adminInfo }) {
       ...(adminInfo?.isSuperAdmin ? [{ name: "Admins", icon: <MdGroups size={18} />, path: "/admin/admins" }] : []),
       { name: "Lecture", icon: <MdOutlineClass size={18} />, path: "/admin/lecture" },
       { name: "Course", icon: <FaBookOpen size={18} />, path: "/admin/course" },
+      { name: "Promotion", icon: <GrAnnounce size={18}/>, path: "/admin/promotion" },
       { name: "Applications", icon: <FaWpforms size={18} />, path: "/admin/applications" },
       { name: "Timetable", icon: <MdEventNote size={18} />, path: "/admin/timetable" },
       { name: "Attendance", icon: <FaClipboardList size={18} />, path: "/admin/attendance" },

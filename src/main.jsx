@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { ToastContainer } from 'react-toastify';
 import './index.css'
 import App from './App.jsx'
 import Dashboard from './components/Dashboard.jsx'
@@ -25,6 +26,7 @@ import Admin from './components/Admin.jsx'
 import AttendanceMark from './components/AttendanceMark.jsx'
 import EditAttendance from './components/EditAttendance.jsx'
 import { ThemeProvider } from './contexts/ThemeContext.jsx'
+import StudentPromotion from './components/StudentPromotion.jsx'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -55,6 +57,7 @@ const router = createBrowserRouter(
       <Route path='/admin/profile' element={<Profile />} ></Route>
       <Route path='/admin/admins' element={<Admin />} />
       <Route path='/admin/students' element={<Students />} />
+      <Route path='/admin/promotion' element={<StudentPromotion />} />
       <Route path='/admin/timetable' element={<Timetable />} />
       <Route path='/admin/attendance' element={<Attendance />} ></Route>
       <Route path='/admin/applications' element={<Applications />} />
@@ -73,6 +76,7 @@ createRoot(document.getElementById('root')).render(
 
   <StrictMode>
     <ThemeProvider>
+      <ToastContainer />
       <RouterProvider router={router} />
     </ThemeProvider>
   </StrictMode>,

@@ -78,8 +78,8 @@ function App() {
 
   return (
     <div className="flex h-screen bg-[#f9fafb] dark:bg-gray-900 text-black dark:text-white">
-tgt
-      <Sidebar studentInfo={studentInfo} adminInfo={adminInfo}/>
+
+      <Sidebar studentInfo={studentInfo} adminInfo={adminInfo} />
 
       <div className="flex flex-col flex-1 overflow-hidden">
 
