@@ -1,10 +1,13 @@
-// ── Imports ──────────────────────────────────────────────
 import { useState, useEffect } from "react";
 import { MdBarChart, MdGroup, MdPerson, MdWarning, MdFilterList } from "react-icons/md";
 import axios from "axios";
 import Swal from 'sweetalert2'
+import * as XLSX from "xlsx"
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { toast, Bounce } from 'react-toastify';
+import { useTheme } from "../contexts/ThemeContext";
 
-// ── AttendanceBadge helper component ─────────────────────
 const AttendanceBadge = ({ pct }) => {
     const color =
         pct >= 75 ? { bar: "bg-green-500", text: "text-green-600 dark:text-green-400", track: "bg-green-100 dark:bg-green-400/10" }
@@ -20,16 +23,9 @@ const AttendanceBadge = ({ pct }) => {
     );
 };
 
-// ── Main Component ────────────────────────────────────────
 const AdminAttendance = () => {
 
-    const getTheme = () => {
-        if (document.documentElement.classList.contains("dark")) return "dark";
-        return "light";
-    };
-
-    const [theme, setTheme] = useState(getTheme);
-
+    const { theme } = useTheme();
     const isDark = theme === "dark";
 
     const [activeTab, setActiveTab] = useState("class");
@@ -41,31 +37,88 @@ const AdminAttendance = () => {
         })
     }
 
-    // ── By Class state ──
     const [classForm, setClassForm] = useState({ degreeTitle: "", semester: "", section: "", shift: "" });
     const [classData, setClassData] = useState([]);
+    const [classErrors, setClassErrors] = useState({})
     const [loadingClass, setLoadingClass] = useState(false);
+    const [loadingExportClass, setLoadingExportClass] = useState(false);
 
-    // ── By Student state ──
     const [studentForm, setStudentForm] = useState({ studentId: "", collegeRollNo: "", degreeTitle: "", semester: "" });
     const [studentData, setStudentData] = useState([]);
+    const [studentErrors, setStudentErrors] = useState({})
     const [loadingStudent, setLoadingStudent] = useState(false);
+    const [loadingExportStudent, setLoadingExportStudent] = useState(false);
 
-    // ── At Risk state ──
     const [riskForm, setRiskForm] = useState({ degreeTitle: "", semester: "", section: "", shift: "" });
     const [riskData, setRiskData] = useState([]);
+    const [riskErrors, setRiskErrors] = useState({})
     const [loadingRisk, setLoadingRisk] = useState(false);
+    const [loadingExportRisk, setLoadingExportRisk] = useState(false);
 
-    // ── Stat card values (compute from data or fetch separately) ──
-    const totalStudents = studentData.length;
-    const avgAttendance = studentData.length
-        ? Math.round(studentData.reduce((sum, s) => sum + s.percentage, 0) / studentData.length)
-        : 0;
-    const atRiskCount = studentData.filter(s => s.percentage < 50).length;
-    const classesTracked = classData.length;
+    const classValidate = () => {
+        let newErrors = {}
+
+        if (!classForm.degreeTitle.trim()) {
+            newErrors.degreeTitle = 'Please select a program'
+        }
+        if (!classForm.semester.trim()) {
+            newErrors.semester = 'Please select a semester'
+        }
+        if (!classForm.shift.trim()) {
+            newErrors.shift = 'Please select a shift'
+        }
+        if (!classForm.section.trim()) {
+            newErrors.section = 'Please select a section'
+        }
+
+        setClassErrors(newErrors)
+        return Object.keys(newErrors).length === 0;
+    }
+
+    const StudentValidate = () => {
+        let newErrors = {}
+
+        if (!studentForm.studentId.trim()) {
+            newErrors.studentId = 'Student-ID is required'
+        }
+        if (!studentForm.collegeRollNo.trim()) {
+            newErrors.collegeRollNo = "College roll number is required";
+        }
+        if (!studentForm.degreeTitle.trim()) {
+            newErrors.degreeTitle = 'Please select a program'
+        }
+        if (!studentForm.semester.trim()) {
+            newErrors.semester = 'Please select a semester'
+        }
+
+        setStudentErrors(newErrors)
+        return Object.keys(newErrors).length === 0;
+    }
+
+    const riskValidate = () => {
+        let newErrors = {}
+
+        if (!riskForm.degreeTitle.trim()) {
+            newErrors.degreeTitle = 'Please select a program'
+        }
+        if (!riskForm.semester.trim()) {
+            newErrors.semester = 'Please select a semester'
+        }
+        if (!riskForm.shift.trim()) {
+            newErrors.shift = 'Please select a shift'
+        }
+        if (!riskForm.section.trim()) {
+            newErrors.section = 'Please select a section'
+        }
+
+        setRiskErrors(newErrors)
+        return Object.keys(newErrors).length === 0;
+    }
 
     const handleClassAttendance = async (e) => {
         e.preventDefault();
+
+        if (!classValidate()) return;
         setLoadingClass(true);
         await handleDelay(3);
         try {
@@ -74,19 +127,31 @@ const AdminAttendance = () => {
             if (response?.data?.success) {
                 setClassData(response.data.data.attendance);
                 setClassForm({ degreeTitle: "", semester: "", section: "", shift: "" })
-                await Swal.fire({
-                    title: response?.data?.message,
-                    icon: "success",
+                toast.success(response.data.message, {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
                     draggable: true,
-                    theme: isDark ? "dark" : "light"
+                    progress: undefined,
+                    theme: isDark ? "dark" : "light",
+                    transition: Bounce
                 });
             }
         } catch (error) {
-            await Swal.fire({
-                title: error?.response?.data?.message,
-                icon: "error",
+            setClassData([])
+            setClassForm({ degreeTitle: "", semester: "", section: "", shift: "" })
+            toast.error(error.response.data.message, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
                 draggable: true,
-                theme: isDark ? "dark" : "light"
+                progress: undefined,
+                theme: isDark ? "dark" : "light",
+                transition: Bounce
             });
             setLoadingClass(false)
         } finally {
@@ -96,6 +161,7 @@ const AdminAttendance = () => {
 
     const handleStudentAttendance = async (e) => {
         e.preventDefault();
+        if (!StudentValidate()) return;
         setLoadingStudent(true);
         await handleDelay(3);
 
@@ -105,19 +171,29 @@ const AdminAttendance = () => {
             if (response?.data?.success) {
                 setStudentData(response.data.data.attendance);
                 setStudentForm({ studentId: "", collegeRollNo: "", degreeTitle: "", semester: "" });
-                await Swal.fire({
-                    title: response.data.message,
-                    icon: "success",
+                toast.success(response.data.message, {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
                     draggable: true,
-                    theme: isDark ? "dark" : "light"
+                    progress: undefined,
+                    theme: isDark ? "dark" : "light",
+                    transition: Bounce
                 });
             }
         } catch (error) {
-            await Swal.fire({
-                title: error?.response?.data?.message,
-                icon: "error",
+            toast.error(error.response.data.message, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
                 draggable: true,
-                theme: isDark ? "dark" : "light"
+                progress: undefined,
+                theme: isDark ? "dark" : "light",
+                transition: Bounce
             });
             setLoadingStudent(false)
         } finally {
@@ -127,6 +203,7 @@ const AdminAttendance = () => {
 
     const handleRiskAttendance = async (e) => {
         e.preventDefault();
+        if (!riskValidate()) return;
         setLoadingRisk(true);
         await handleDelay(3);
 
@@ -135,26 +212,118 @@ const AdminAttendance = () => {
 
             if (response?.data?.success) {
                 setRiskData(response.data.data.attendance);
-                console.log(response.data.data.attendance)
                 setRiskForm({ degreeTitle: "", semester: "", section: "", shift: "" });
-                await Swal.fire({
-                    title: response.data.message,
-                    icon: "success",
+                toast.success(response.data.message, {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
                     draggable: true,
-                    theme: isDark ? "dark" : "light"
+                    progress: undefined,
+                    theme: isDark ? "dark" : "light",
+                    transition: Bounce
                 });
             }
         } catch (error) {
-            await Swal.fire({
-                title: error?.response?.data?.message,
-                icon: "error",
+            toast.error(error.response.data.message, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
                 draggable: true,
-                theme: isDark ? "dark" : "light"
+                progress: undefined,
+                theme: isDark ? "dark" : "light",
+                transition: Bounce
             });
             setLoadingRisk(false)
         } finally {
             setLoadingRisk(false)
         }
+    }
+
+    const exportClassExcel = async () => {
+        const excelData = classData.map((student) => ({
+            FullName: student.fullName,
+            CollegeRN: student.collegeRollNo,
+            OverallPercentage: `${student.overallPercentage}%`,
+            ...Object.fromEntries(
+                student.coursePercentage.map((course) => [
+                    course.courseCode,
+                    `${course.percentage}%`,
+                ])
+            ),
+        }));
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "attendance-by-class");
+        setLoadingExportClass(true);
+        await handleDelay(2);
+        setLoadingExportClass(false);
+        XLSX.writeFile(workbook, "attendance-by-class.xlsx");
+    }
+
+    const exportStudentPDF = async () => {
+        const doc = new jsPDF();
+
+        //Title
+        doc.setFontSize(18);
+        doc.text("Student Attendance Report", 14, 20);
+
+        // Student Info Table
+        autoTable(doc, {
+            startY: 30,
+            theme: "grid",
+            head: [["Field", "Value"]],
+            body: [
+                ["Full Name", studentData[0].fullName],
+                ["Student ID", studentData[0].studentId],
+                ["College Roll No", studentData[0].collegeRollNo],
+                ["Degree", studentData[0].degreeTitle],
+                ["Semester", studentData[0].semester],
+                ["Overall Percentage", `${studentData[0].overallPercentage}%`],
+                [
+                    "Attendance",
+                    `${studentData[0].totalPresentCount}/${studentData[0].totalClassCount}`,
+                ],
+            ]
+        })
+
+        //Course Table
+        autoTable(doc, {
+            startY: doc.lastAutoTable.finalY + 10,
+            theme: "grid",
+            head: [["Course Code", "Total", "Present", "Percentage"]],
+            body: studentData[0].coursePercentage.map((course) => [
+                course.courseCode,
+                course.totalCount,
+                course.presentCount,
+                `${course.percentage}%`,
+            ]),
+        })
+
+        setLoadingExportStudent(true);
+        await handleDelay(2);
+        setLoadingExportStudent(false);
+        doc.save(`${studentData[0].studentId}-Attendance.pdf`);
+    }
+
+    const exportRiskStudentExcel = async () => {
+        const excelData = riskData.map((student) => ({
+            FullName: student.fullName,
+            CollegeRN: student.collegeRollNo,
+            OverallPercentage: `${student.overallPercentage}%`,
+            TotalClassCount: student.totalClassCount,
+            TotalPresentCount: student.totalPresentCount
+        }))
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, "struct-of-students-list");
+        setLoadingExportRisk(true)
+        await handleDelay(2);
+        setLoadingExportRisk(false);
+        XLSX.writeFile(workbook, "struct-of-students-list.xlsx")
     }
 
     return (
@@ -174,19 +343,6 @@ const AdminAttendance = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-                    {[
-                        { label: "Total Students", value: totalStudents, color: "text-[#ba7a4e]" },
-                        { label: "Avg Attendance", value: `${avgAttendance}%`, color: "text-green-600 dark:text-green-400" },
-                        { label: "At Risk (below 50%)", value: atRiskCount, color: "text-red-500 dark:text-red-400" },
-                        { label: "Classes Tracked", value: classesTracked, color: "text-gray-800 dark:text-zinc-100" },
-                    ].map(({ label, value, color }) => (
-                        <div key={label} className="bg-white dark:bg-zinc-800 black:bg-[#0d0d0d] rounded-xl p-3 border border-gray-100 dark:border-zinc-700 black:border-[#1f1f1f] shadow-sm">
-                            <p className="text-xs text-gray-500 dark:text-zinc-400 black:text-[#666] mb-1">{label}</p>
-                            <p className={`text-2xl font-bold ${color}`}>{value}</p>
-                        </div>
-                    ))}
-                </div>
 
                 {/* Tabs */}
                 <div className="flex gap-2 mb-5 flex-wrap">
@@ -225,6 +381,7 @@ const AdminAttendance = () => {
                                             <option value="">Select Program</option>
                                             <option>CS</option><option>IT</option><option>PHY</option><option>CHEM</option><option>ISL</option><option>ENG</option>
                                         </select>
+                                        {classErrors.degreeTitle && <p className="text-red-500 text-xs">{classErrors.degreeTitle}</p>}
                                     </div>
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444]">Semester</label>
@@ -233,6 +390,7 @@ const AdminAttendance = () => {
                                             <option value="">Select Semester</option>
                                             {[1, 2, 3, 4, 5, 6, 7, 8].map(n => <option key={n}>{n}</option>)}
                                         </select>
+                                        {classErrors.semester && <p className="text-red-500 text-xs">{classErrors.semester}</p>}
                                     </div>
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444]">Section</label>
@@ -241,6 +399,7 @@ const AdminAttendance = () => {
                                             <option value="">Select Section</option>
                                             <option>G1</option><option>G2</option>
                                         </select>
+                                        {classErrors.section && <p className="text-red-500 text-xs">{classErrors.section}</p>}
                                     </div>
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444]">Shift</label>
@@ -249,14 +408,34 @@ const AdminAttendance = () => {
                                             <option value="">Select Shift</option>
                                             <option>Morning</option><option>Evening</option>
                                         </select>
+                                        {classErrors.shift && <p className="text-red-500 text-xs">{classErrors.shift}</p>}
                                     </div>
-                                    <div className="col-span-full flex justify-end mt-2">
-                                        <button
-                                            type="submit"
-                                            className="h-[40px] px-6 bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
-                                        >
-                                            {loadingClass ? "Loading..." : "Submit"}
-                                        </button>
+                                    <div className="col-span-full flex justify-end mt-2 gap-x-3">
+                                        {
+                                            classData.length > 0 ? (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        onClick={exportClassExcel}
+                                                        className="h-[40px] px-6 bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
+                                                    >
+                                                        {loadingExportClass ? "Exporting..." : "Export as excel"}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setClassData([]) }}
+                                                        className="h-[40px] px-6 bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
+                                                    >
+                                                        Reset
+                                                    </button>
+                                                </>
+                                            ) : <button
+                                                type="submit"
+                                                className="h-[40px] px-6 bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
+                                            >
+                                                {loadingClass ? "Loading..." : "Submit"}
+                                            </button>
+                                        }
                                     </div>
                                 </div>
                             </form>
@@ -304,12 +483,14 @@ const AdminAttendance = () => {
                                         <input type="text" value={studentForm.studentId} onChange={(e) => setStudentForm({ ...studentForm, studentId: e.target.value })}
                                             placeholder="Enter student ID"
                                             className="h-[40px] px-3 text-sm border border-gray-200 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]/20 focus:border-[#ba7a4e] transition" />
+                                        {studentErrors.studentId && <p className="text-red-500 text-xs">{studentErrors.studentId}</p>}
                                     </div>
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444]">College RN</label>
                                         <input type="text" value={studentForm.collegeRollNo} onChange={(e) => setStudentForm({ ...studentForm, collegeRollNo: e.target.value })}
                                             placeholder="Enter college RN"
                                             className="h-[40px] px-3 text-sm border border-gray-200 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-zinc-700 black:bg-[#141414] text-gray-800 dark:text-zinc-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]/20 focus:border-[#ba7a4e] transition" />
+                                        {studentErrors.collegeRollNo && <p className="text-red-500 text-xs">{studentErrors.collegeRollNo}</p>}
                                     </div>
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444]">Degree</label>
@@ -318,6 +499,7 @@ const AdminAttendance = () => {
                                             <option value="">Select Program</option>
                                             <option>CS</option><option>IT</option><option>PHY</option><option>CHEM</option><option>ISL</option><option>ENG</option>
                                         </select>
+                                        {studentErrors.degreeTitle && <p className="text-red-500 text-xs">{studentErrors.degreeTitle}</p>}
                                     </div>
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444]">Semester</label>
@@ -326,14 +508,34 @@ const AdminAttendance = () => {
                                             <option value="">Select Semester</option>
                                             <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option>
                                         </select>
+                                        {studentErrors.semester && <p className="text-red-500 text-xs">{studentErrors.semester}</p>}
                                     </div>
-                                    <div className="col-span-full flex justify-end mt-2">
-                                        <button
-                                            type="submit"
-                                            className="h-[40px] px-6 bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
-                                        >
-                                            {loadingStudent ? "Loading..." : "Submit"}
-                                        </button>
+                                    <div className="col-span-full flex justify-end mt-2 gap-x-3">
+                                        {
+                                            studentData.length > 0 ? (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        onClick={exportStudentPDF}
+                                                        className="h-[40px] px-6 bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
+                                                    >
+                                                        {loadingExportStudent ? "Exporting..." : "Export as PDF"}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setStudentData([]) }}
+                                                        className="h-[40px] px-6 bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
+                                                    >
+                                                        Reset
+                                                    </button>
+                                                </>
+                                            ) : <button
+                                                type="submit"
+                                                className="h-[40px] px-6 bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
+                                            >
+                                                {loadingStudent ? "Loading..." : "Submit"}
+                                            </button>
+                                        }
                                     </div>
                                 </div>
                             </form>
@@ -393,6 +595,7 @@ const AdminAttendance = () => {
                                             <option value="">Select Program</option>
                                             <option>CS</option><option>IT</option><option>PHY</option><option>CHEM</option><option>ISL</option><option>ENG</option>
                                         </select>
+                                        {riskErrors.degreeTitle && <p className="text-red-500 text-xs">{riskErrors.degreeTitle}</p>}
                                     </div>
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444]">Semester</label>
@@ -401,6 +604,7 @@ const AdminAttendance = () => {
                                             <option value="">Select Semester</option>
                                             {[1, 2, 3, 4, 5, 6, 7, 8].map(n => <option key={n}>{n}</option>)}
                                         </select>
+                                        {riskErrors.semester && <p className="text-red-500 text-xs">{riskErrors.semester}</p>}
                                     </div>
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444]">Section</label>
@@ -409,6 +613,7 @@ const AdminAttendance = () => {
                                             <option value="">Select Section</option>
                                             <option>G1</option><option>G2</option>
                                         </select>
+                                        {riskErrors.section && <p className="text-red-500 text-xs">{riskErrors.section}</p>}
                                     </div>
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 black:text-[#444]">Shift</label>
@@ -417,14 +622,34 @@ const AdminAttendance = () => {
                                             <option value="">Select Shift</option>
                                             <option>Morning</option><option>Evening</option>
                                         </select>
+                                        {riskErrors.shift && <p className="text-red-500 text-xs">{riskErrors.shift}</p>}
                                     </div>
-                                    <div className="col-span-full flex justify-end mt-2">
-                                        <button
-                                            type="submit"
-                                            className="h-[40px] px-6 bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
-                                        >
-                                            {loadingRisk ? "Loading..." : "Submit"}
-                                        </button>
+                                    <div className="col-span-full flex justify-end mt-2 gap-x-3">
+                                        {
+                                            riskData.length > 0 ? (
+                                                <>
+                                                    <button
+                                                        type="button"
+                                                        onClick={exportRiskStudentExcel}
+                                                        className="h-[40px] px-6 bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
+                                                    >
+                                                        {loadingExportRisk ? "Exporting..." : "Export as excel"}
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => { setRiskData([]) }}
+                                                        className="h-[40px] px-6 bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
+                                                    >
+                                                        Reset
+                                                    </button>
+                                                </>
+                                            ) : <button
+                                                type="submit"
+                                                className="h-[40px] px-6 bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
+                                            >
+                                                {loadingRisk ? "Loading..." : "Submit"}
+                                            </button>
+                                        }
                                     </div>
                                 </div>
                             </form>

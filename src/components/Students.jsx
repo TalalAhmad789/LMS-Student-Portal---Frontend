@@ -771,8 +771,8 @@ const Students = () => {
                     <td className="px-4 py-3 text-sm font-semibold text-[#ba7a4e]">{item.studentId}</td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium ${item.status === "Active"
-                          ? "bg-green-50 dark:bg-green-400/10 text-green-700 dark:text-green-400"
-                          : "bg-red-50 dark:bg-red-400/10 text-red-600 dark:text-red-400"
+                        ? "bg-green-50 dark:bg-green-400/10 text-green-700 dark:text-green-400"
+                        : "bg-red-50 dark:bg-red-400/10 text-red-600 dark:text-red-400"
                         }`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${item.status === "Active" ? "bg-green-500" : "bg-red-500"}`} />
                         {item.status}
