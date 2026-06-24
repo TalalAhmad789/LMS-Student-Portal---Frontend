@@ -7,7 +7,7 @@ import Dashboard from './components/Dashboard.jsx'
 import Assignments from './components/Assignments.jsx'
 import Attendance from './components/Attendance.jsx'
 import Students from './components/Students.jsx'
-import Login from './components/Login.jsx'
+import StudentLogin from './components/StudentLogin.jsx'
 import Profile from './components/Profile.jsx'
 import { RouterProvider, createBrowserRouter, createRoutesFromElements, Route } from 'react-router-dom'
 import Teacher from './components/Teacher.jsx'
@@ -27,13 +27,14 @@ import AttendanceMark from './components/AttendanceMark.jsx'
 import EditAttendance from './components/EditAttendance.jsx'
 import { ThemeProvider } from './contexts/ThemeContext.jsx'
 import StudentPromotion from './components/StudentPromotion.jsx'
+import AdminLogin from './components/AdminLogin.jsx'
+import TeacherLogin from './components/TeacherLogin.jsx'
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path='' element={<App />}>
 
-      <Route path='/login' element={<Login />} ></Route>
-
+      <Route path='/login' element={<StudentLogin />} ></Route>
       <Route path='/student/dashboard' element={<Dashboard />} ></Route>
       <Route path='/student/profile' element={<Profile />} ></Route>
       <Route path='/student/academics' element={<Academics />} ></Route>
@@ -45,6 +46,7 @@ const router = createBrowserRouter(
       <Route path='/student/security' element={<Security />} ></Route>
       <Route path='/student/access_and_devices' element={<Access_And_Devices />} ></Route>
 
+      <Route path='/teacher-fe7$nf!fd7/login' element={<TeacherLogin />}></Route>
       <Route path='/teacher/dashboard' element={<Dashboard />} ></Route>
       <Route path='/teacher/profile' element={<Profile />} ></Route>
       <Route path='/teacher/security' element={<Security />} ></Route>
@@ -52,7 +54,7 @@ const router = createBrowserRouter(
       <Route path='/teacher/attendance/submit' element={<AttendanceMark />} ></Route>
       <Route path='/teacher/attendance/edit' element={<EditAttendance />} ></Route>
 
-
+      <Route path='/admin-bh$d!f74d4/login' element={<AdminLogin />}></Route>
       <Route path='/admin/dashboard' element={<Dashboard />} />
       <Route path='/admin/profile' element={<Profile />} ></Route>
       <Route path='/admin/admins' element={<Admin />} />

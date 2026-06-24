@@ -3,7 +3,6 @@ import { PiStudentFill } from "react-icons/pi";
 import { GrAnnounce } from "react-icons/gr";
 import { FaArrowTrendUp } from "react-icons/fa6";
 import axios from 'axios';
-import Swal from 'sweetalert2'
 import { toast, Bounce } from 'react-toastify';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -71,7 +70,7 @@ const StudentPromotion = () => {
                 });
             }
         } catch (error) {
-            toast.error(error.response.data.message, {
+            toast.error(error.response.data.message || "Something went wrong!", {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -110,7 +109,7 @@ const StudentPromotion = () => {
                 });
             }
         } catch (error) {
-            toast.error(error.response.data.message, {
+            toast.error(error.response.data.message || "Something went wrong!", {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,

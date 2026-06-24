@@ -19,6 +19,8 @@ function App() {
   const isTeacherRoute = route.pathname.startsWith("/teacher");
   const isAdminRoute = route.pathname.startsWith("/admin");
   const isLoginPage = route.pathname === "/login";
+  const isTeacherLoginPage = route.pathname === "/teacher-fe7$nf!fd7/login"
+  const isAdminLoginPage = route.pathname === "/admin-bh$d!f74d4/login"
 
   useEffect(() => {
     const checkSession = async () => {
@@ -26,7 +28,6 @@ function App() {
         try {
           const res = await axios.get("/api/v1/students/me", { withCredentials: true });
           if (res?.data?.success) {
-            console.log()
             setStudentInfo(res.data.data.student);
           } else {
             navigate("/login");
@@ -36,7 +37,7 @@ function App() {
         }
       }
 
-      else if (isTeacherRoute && !isLoginPage) {
+      else if (isTeacherRoute && !isTeacherLoginPage) {
         try {
           const res = await axios.get('/api/v1/teachers/me', { withCredentials: true });
           if (res?.data?.success) {
@@ -50,7 +51,7 @@ function App() {
         }
       }
 
-      else if (isAdminRoute && !isLoginPage) {
+      else if (isAdminRoute && !isAdminLoginPage) {
         try {
           const res = await axios.get('/api/v1/admin/me', { withCredentials: true });
           if (res?.data?.success) {
@@ -66,12 +67,12 @@ function App() {
     };
 
     checkSession();
-  }, [isStudentRoute, isLoginPage, navigate, isTeacherRoute, isAdminRoute]);
+  }, [isStudentRoute, isLoginPage, navigate, isTeacherRoute, isAdminRoute, isTeacherLoginPage, isAdminLoginPage]);
 
   if (
     (isStudentRoute && !isLoginPage && !studentInfo) ||
-    (isTeacherRoute && !isLoginPage && !teacherInfo) ||
-    (isAdminRoute && !isLoginPage && !adminInfo)
+    (isTeacherRoute && !isTeacherLoginPage && !teacherInfo) ||
+    (isAdminRoute && !isAdminLoginPage && !adminInfo)
   ) {
     return <div></div>;
   }

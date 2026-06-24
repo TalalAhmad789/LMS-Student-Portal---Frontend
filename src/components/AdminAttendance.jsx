@@ -7,6 +7,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { toast, Bounce } from 'react-toastify';
 import { useTheme } from "../contexts/ThemeContext";
+import { RiPictureInPictureExitLine } from "react-icons/ri";
 
 const AttendanceBadge = ({ pct }) => {
     const color =
@@ -54,6 +55,7 @@ const AdminAttendance = () => {
     const [riskErrors, setRiskErrors] = useState({})
     const [loadingRisk, setLoadingRisk] = useState(false);
     const [loadingExportRisk, setLoadingExportRisk] = useState(false);
+    const [loadingSOStudent, setLoadingSOStudent] = useState(false);
 
     const classValidate = () => {
         let newErrors = {}
@@ -142,7 +144,7 @@ const AdminAttendance = () => {
         } catch (error) {
             setClassData([])
             setClassForm({ degreeTitle: "", semester: "", section: "", shift: "" })
-            toast.error(error.response.data.message, {
+            toast.error(error.response.data.message || "Something went wrong!", {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -184,7 +186,7 @@ const AdminAttendance = () => {
                 });
             }
         } catch (error) {
-            toast.error(error.response.data.message, {
+            toast.error(error.response.data.message  || "Something went wrong!", {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -212,6 +214,7 @@ const AdminAttendance = () => {
 
             if (response?.data?.success) {
                 setRiskData(response.data.data.attendance);
+                console.log(response.data.data.attendance);
                 setRiskForm({ degreeTitle: "", semester: "", section: "", shift: "" });
                 toast.success(response.data.message, {
                     position: "top-right",
@@ -226,7 +229,7 @@ const AdminAttendance = () => {
                 });
             }
         } catch (error) {
-            toast.error(error.response.data.message, {
+            toast.error(error.response.data.message  || "Something went wrong!", {
                 position: "top-right",
                 autoClose: 5000,
                 hideProgressBar: false,
@@ -326,6 +329,73 @@ const AdminAttendance = () => {
         XLSX.writeFile(workbook, "struct-of-students-list.xlsx")
     }
 
+    const handleStructOffStudent = async (CR) => {
+        try {
+            const result = await Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, Struct Off!",
+                theme: isDark ? "dark" : "light"
+            });
+
+            if (!result.isConfirmed) return;
+
+            setLoadingSOStudent(true);
+
+            await handleDelay(2);
+
+            const res = await axios.post(
+                "/api/v1/admin/struct-off-student-check",
+                { collegeRollNo: CR }
+            );
+
+            if (res?.data?.statusCode !== 200) {
+                throw new Error(res?.data?.message || "Student check failed.");
+            }
+
+            const response = await axios.post(
+                "/api/v1/admin/attendance-struct-off-student",
+                { collegeRollNo: CR }
+            );
+
+            if (response?.data?.success) {
+                toast.success(response.data.message, {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: isDark ? "dark" : "light",
+                    transition: Bounce
+                });
+            } else {
+                throw new Error(response?.data?.message || "Failed to struct off student.");
+            }
+        } catch (error) {
+            toast.error(
+                error?.response?.data?.message || error.message || "Something went wrong!",
+                {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: isDark ? "dark" : "light",
+                    transition: Bounce
+                }
+            );
+        } finally {
+            setLoadingSOStudent(false);
+        }
+    };
     return (
         <>
             <div className="w-full h-[3px] bg-[#ba7a4e]" />
@@ -343,8 +413,6 @@ const AdminAttendance = () => {
                     </div>
                 </div>
 
-
-                {/* Tabs */}
                 <div className="flex gap-2 mb-5 flex-wrap">
                     {[
                         { key: "class", label: "By Class", icon: <MdGroup size={15} /> },
@@ -424,7 +492,7 @@ const AdminAttendance = () => {
                                                     <button
                                                         type="button"
                                                         onClick={() => { setClassData([]) }}
-                                                        className="h-[40px] px-6 bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
+                                                        className="px-6 py-2 text-sm rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
                                                     >
                                                         Reset
                                                     </button>
@@ -524,7 +592,7 @@ const AdminAttendance = () => {
                                                     <button
                                                         type="button"
                                                         onClick={() => { setStudentData([]) }}
-                                                        className="h-[40px] px-6 bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
+                                                        className="px-6 py-2 text-sm rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
                                                     >
                                                         Reset
                                                     </button>
@@ -638,7 +706,7 @@ const AdminAttendance = () => {
                                                     <button
                                                         type="button"
                                                         onClick={() => { setRiskData([]) }}
-                                                        className="h-[40px] px-6 bg-[#ba7a4e] hover:bg-[#a06840] text-white text-sm font-medium rounded-lg transition"
+                                                        className="px-6 py-2 text-sm rounded-lg border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30 transition"
                                                     >
                                                         Reset
                                                     </button>
@@ -660,7 +728,7 @@ const AdminAttendance = () => {
                                 <table className="w-full text-left">
                                     <thead>
                                         <tr className="bg-gray-50 dark:bg-zinc-700/50 border-b border-gray-100 dark:border-zinc-700">
-                                            {["#", "CollegeRN", "Full Name", "Total", "Attended", "OVR Attendance", "Status"].map(h => (
+                                            {["#", "CollegeRN", "Full Name", "Total", "Attended", "OVR Attendance", "Status", "Actions"].map(h => (
                                                 <th key={h} className="px-4 py-3 text-[11px] font-medium uppercase tracking-widest text-gray-400 dark:text-zinc-500 whitespace-nowrap">{h}</th>
                                             ))}
                                         </tr>
@@ -686,6 +754,13 @@ const AdminAttendance = () => {
                                                             <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" /> Warning
                                                         </span>
                                                     )}
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <button onClick={() => { handleStructOffStudent(item.collegeRollNo) }}
+                                                        className="w-8 h-8 flex items-center justify-center bg-[#ba7a4e]/10 hover:bg-[#ba7a4e]/20 text-[#ba7a4e] border border-[#ba7a4e]/20 rounded-lg transition"
+                                                        title="Reset Password">
+                                                        <RiPictureInPictureExitLine size={16} />
+                                                    </button>
                                                 </td>
                                             </tr>
                                         ))}
