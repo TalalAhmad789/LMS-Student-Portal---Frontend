@@ -5,9 +5,8 @@ import Swal from 'sweetalert2'
 import * as XLSX from "xlsx"
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import { toast, Bounce } from 'react-toastify';
-import { useTheme } from "../contexts/ThemeContext";
 import { RiPictureInPictureExitLine } from "react-icons/ri";
+import { useToast } from '../hooks/useToast'
 
 const AttendanceBadge = ({ pct }) => {
     const color =
@@ -26,8 +25,7 @@ const AttendanceBadge = ({ pct }) => {
 
 const AdminAttendance = () => {
 
-    const { theme } = useTheme();
-    const isDark = theme === "dark";
+    const { showSuccessToast, showErrorToast, showConfimationToast } = useToast();
 
     const [activeTab, setActiveTab] = useState("class");
     const handleDelay = (delay) => {
@@ -129,32 +127,12 @@ const AdminAttendance = () => {
             if (response?.data?.success) {
                 setClassData(response.data.data.attendance);
                 setClassForm({ degreeTitle: "", semester: "", section: "", shift: "" })
-                toast.success(response.data.message, {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: isDark ? "dark" : "light",
-                    transition: Bounce
-                });
+                showSuccessToast(response.data.message)
             }
         } catch (error) {
             setClassData([])
             setClassForm({ degreeTitle: "", semester: "", section: "", shift: "" })
-            toast.error(error.response.data.message || "Something went wrong!", {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: isDark ? "dark" : "light",
-                transition: Bounce
-            });
+            showErrorToast(error.response.data.message || "Something went wrong!")
             setLoadingClass(false)
         } finally {
             setLoadingClass(false)
@@ -173,30 +151,10 @@ const AdminAttendance = () => {
             if (response?.data?.success) {
                 setStudentData(response.data.data.attendance);
                 setStudentForm({ studentId: "", collegeRollNo: "", degreeTitle: "", semester: "" });
-                toast.success(response.data.message, {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: isDark ? "dark" : "light",
-                    transition: Bounce
-                });
+                showSuccessToast(response.data.message)
             }
         } catch (error) {
-            toast.error(error.response.data.message  || "Something went wrong!", {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: isDark ? "dark" : "light",
-                transition: Bounce
-            });
+            showErrorToast(error.response.data.message || "Something went wrong!")
             setLoadingStudent(false)
         } finally {
             setLoadingStudent(false)
@@ -214,32 +172,11 @@ const AdminAttendance = () => {
 
             if (response?.data?.success) {
                 setRiskData(response.data.data.attendance);
-                console.log(response.data.data.attendance);
                 setRiskForm({ degreeTitle: "", semester: "", section: "", shift: "" });
-                toast.success(response.data.message, {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: isDark ? "dark" : "light",
-                    transition: Bounce
-                });
+                showSuccessToast(response.data.message)
             }
         } catch (error) {
-            toast.error(error.response.data.message  || "Something went wrong!", {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: isDark ? "dark" : "light",
-                transition: Bounce
-            });
+            showErrorToast(error.response.data.message || "Something went wrong!")
             setLoadingRisk(false)
         } finally {
             setLoadingRisk(false)
@@ -331,17 +268,7 @@ const AdminAttendance = () => {
 
     const handleStructOffStudent = async (CR) => {
         try {
-            const result = await Swal.fire({
-                title: "Are you sure?",
-                text: "You won't be able to revert this!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Yes, Struct Off!",
-                theme: isDark ? "dark" : "light"
-            });
-
+            const result = await showConfimationToast("Yes, Struct Off")
             if (!result.isConfirmed) return;
 
             setLoadingSOStudent(true);
@@ -363,17 +290,7 @@ const AdminAttendance = () => {
             );
 
             if (response?.data?.success) {
-                toast.success(response.data.message, {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: isDark ? "dark" : "light",
-                    transition: Bounce
-                });
+                showSuccessToast(response.data.message)
             } else {
                 throw new Error(response?.data?.message || "Failed to struct off student.");
             }
@@ -396,6 +313,7 @@ const AdminAttendance = () => {
             setLoadingSOStudent(false);
         }
     };
+
     return (
         <>
             <div className="w-full h-[3px] bg-[#ba7a4e]" />

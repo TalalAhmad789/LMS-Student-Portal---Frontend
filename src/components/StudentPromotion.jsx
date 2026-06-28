@@ -5,11 +5,11 @@ import { FaArrowTrendUp } from "react-icons/fa6";
 import axios from 'axios';
 import { toast, Bounce } from 'react-toastify';
 import { useTheme } from '../contexts/ThemeContext';
+import { useToast } from '../hooks/useToast'
 
 const StudentPromotion = () => {
 
-    const { theme } = useTheme()
-    const isDark = theme === "dark";
+    const { showSuccessToast, showErrorToast } = useToast()
 
     const [classForm, setClassForm] = useState({ degreeTitle: "", semester: "" })
     const [studentsData, setStudentsData] = useState([])
@@ -57,30 +57,10 @@ const StudentPromotion = () => {
             if (response?.data?.success) {
                 setStudentsData(response.data.data.students)
                 setClassForm({ degreeTitle: "", semester: "" })
-                toast.success(response.data.message, {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: isDark ? "dark" : "light",
-                    transition: Bounce
-                });
+                showSuccessToast(response.data.message)
             }
         } catch (error) {
-            toast.error(error.response.data.message || "Something went wrong!", {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: isDark ? "dark" : "light",
-                transition: Bounce
-            });
+            showErrorToast(error.response.data.message || "Something went wrong!")
             setLoading1(false)
         } finally {
             setLoading1(false)
@@ -96,30 +76,10 @@ const StudentPromotion = () => {
             const response = await axios.post('/api/v1/admin/student-promotion', studentsData);
             if (response?.data?.success) {
                 setStudentsData([])
-                toast.success(response.data.message, {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: false,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: isDark ? "dark" : "light",
-                    transition: Bounce
-                });
+                showSuccessToast(response.data.message)
             }
         } catch (error) {
-            toast.error(error.response.data.message || "Something went wrong!", {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: false,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: isDark ? "dark" : "light",
-                transition: Bounce
-            });
+            showErrorToast(error.response.data.message || "Something went wrong!")
             setLoading2(false)
         } finally {
             setLoading2(false)

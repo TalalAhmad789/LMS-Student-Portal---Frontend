@@ -27,13 +27,14 @@ import {
 import { GrAnnounce } from "react-icons/gr";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { useToast } from '../hooks/useToast'
 
 export default function Sidebar({ studentInfo, adminInfo }) {
 
+  const { showSuccessToast, showErrorToast } = useToast()
   const location = useLocation();
   const navigate = useNavigate();
   const currentRoute = location.pathname.split("/")[1];
-
 
   const menuItems = {
     student: [
@@ -54,7 +55,7 @@ export default function Sidebar({ studentInfo, adminInfo }) {
       ...(adminInfo?.isSuperAdmin ? [{ name: "Admins", icon: <MdGroups size={18} />, path: "/admin/admins" }] : []),
       { name: "Lecture", icon: <MdOutlineClass size={18} />, path: "/admin/lecture" },
       { name: "Course", icon: <FaBookOpen size={18} />, path: "/admin/course" },
-      { name: "Promotion", icon: <GrAnnounce size={18}/>, path: "/admin/promotion" },
+      { name: "Promotion", icon: <GrAnnounce size={18} />, path: "/admin/promotion" },
       { name: "Applications", icon: <FaWpforms size={18} />, path: "/admin/applications" },
       { name: "Timetable", icon: <MdEventNote size={18} />, path: "/admin/timetable" },
       { name: "Attendance", icon: <FaClipboardList size={18} />, path: "/admin/attendance" },
@@ -89,22 +90,11 @@ export default function Sidebar({ studentInfo, adminInfo }) {
       );
 
       if (response?.data?.success) {
-        Swal.fire({
-          title: response?.data?.message,
-          icon: "success",
-          timer: 1500,
-          showConfirmButton: true,
-        });
-
-        navigate(`/login`);
+        showSuccessToast(response?.data?.message);
+        userType === 'admin' ? navigate('/admin-bh$d!f74d4/login') : userType === '/teacher-fe7$nf!fd7/login' ? navigate('/teacher') : navigate('/login');
       }
     } catch (error) {
-      console.error("Logout failed:", error);
-      Swal.fire({
-        title: "Logout failed!",
-        text: "Please try again.",
-        icon: "error",
-      });
+      showErrorToast(error.response.data.message || "Something went wrong!");
     }
   };
 

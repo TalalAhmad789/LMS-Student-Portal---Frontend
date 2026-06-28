@@ -3,19 +3,41 @@ import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { toast, Bounce } from 'react-toastify';
+import { useToast } from '../hooks/useToast'
 
 const StudentLogin = () => {
+
+  const { showSuccessToast, showErrorToast } = useToast();
+
   const navigate = useNavigate();
   const route = useLocation();
 
   const [showPassword, setShowPassword] = useState(false);
   const [is30Days, setis30Days] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({})
 
   const [form, setForm] = useState({
     studentId: "",
     password: "",
   });
+
+  const validate = () => {
+    let newErrors = {}
+
+    if (!form.studentId.trim()) {
+      newErrors.studentId = "Student ID is required";
+    }
+
+    if (!form.password.trim()) {
+      newErrors.password = "Password is required"
+    }
+
+    setErrors(newErrors)
+
+    return Object.keys(newErrors).length === 0;
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -33,6 +55,8 @@ const StudentLogin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!validate()) return;
+
     const payload = {
       studentId: form.studentId,
       password: form.password,
@@ -48,18 +72,11 @@ const StudentLogin = () => {
       });
 
       if (response?.data?.success) {
-        Swal.fire({
-          title: response.data.message,
-          icon: "success",
-        });
-
+        showSuccessToast(response.data.message);
         navigate("/student/dashboard");
       }
     } catch (error) {
-      Swal.fire({
-        title: error?.response?.data?.message,
-        icon: "error",
-      });
+      showErrorToast(error.response.data.message || "Something went wrong!")
     } finally {
       setLoading(false);
     }
@@ -114,6 +131,7 @@ const StudentLogin = () => {
                   placeholder="Enter your Student ID"
                   className="h-[42px] px-3 text-sm border border-gray-200 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-zinc-800 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]/20 focus:border-[#ba7a4e] transition"
                 />
+                {errors.studentId && <p className="text-red-500 text-xs">{errors.studentId}</p>}
               </div>
 
               <div className="flex flex-col gap-1.5">
@@ -129,12 +147,13 @@ const StudentLogin = () => {
                     placeholder="Enter your password"
                     className="h-[42px] w-full px-3 pr-16 text-sm border border-gray-200 dark:border-zinc-600 black:border-[#2a2a2a] rounded-lg bg-gray-50 dark:bg-zinc-800 black:bg-[#141414] text-gray-800 dark:text-zinc-100 black:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-[#ba7a4e]/20 focus:border-[#ba7a4e] transition"
                   />
+                  {errors.password && <p className="text-red-500 text-xs">{errors.password}</p>}
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-[#ba7a4e] hover:text-[#a06840] transition"
+                    className={`absolute right-3 ${errors.password ? "top-1/3" : "top-1/2"} -translate-y-1/2 text-xs font-medium text-[#ba7a4e] hover:text-[#a06840] transition`}
                   >
-                    {showPassword ? <FaEyeSlash size={18}/> : <FaEye size={18}/>}
+                    {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
                   </button>
                 </div>
               </div>
@@ -150,6 +169,7 @@ const StudentLogin = () => {
                   <span className="text-xs text-gray-500 dark:text-zinc-400 black:text-[#888]">Remember for 30 days</span>
                 </label>
                 <button
+                  onClick={() => { navigate('/forgot-password') }}
                   type="button"
                   className="text-xs font-medium text-[#ba7a4e] hover:text-[#a06840] hover:underline transition"
                 >

@@ -29,12 +29,14 @@ import { ThemeProvider } from './contexts/ThemeContext.jsx'
 import StudentPromotion from './components/StudentPromotion.jsx'
 import AdminLogin from './components/AdminLogin.jsx'
 import TeacherLogin from './components/TeacherLogin.jsx'
+import ForgotPassword from './components/ForgotPassword.jsx';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route path='' element={<App />}>
 
       <Route path='/login' element={<StudentLogin />} ></Route>
+      <Route path='/forgot-password' element={<ForgotPassword />}></Route>
       <Route path='/student/dashboard' element={<Dashboard />} ></Route>
       <Route path='/student/profile' element={<Profile />} ></Route>
       <Route path='/student/academics' element={<Academics />} ></Route>
