@@ -170,6 +170,7 @@ const AdminLogin = () => {
                   <span className="text-xs text-gray-500 dark:text-zinc-400 black:text-[#888]">Remember for 30 days</span>
                 </label>
                 <button
+                  onClick={()=> {navigate("/a-bh$d!f74d4/forgot-password")}}
                   type="button"
                   className="text-xs font-medium text-[#ba7a4e] hover:text-[#a06840] hover:underline transition"
                 >

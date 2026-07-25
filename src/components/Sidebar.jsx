@@ -91,7 +91,7 @@ export default function Sidebar({ studentInfo, adminInfo }) {
 
       if (response?.data?.success) {
         showSuccessToast(response?.data?.message);
-        userType === 'admin' ? navigate('/admin-bh$d!f74d4/login') : userType === '/teacher-fe7$nf!fd7/login' ? navigate('/teacher') : navigate('/login');
+        userType === 'admin' ? navigate('/a-bh$d!f74d4/login') : userType === 'teacher' ? navigate('/t-fe7$nf!fd7/login') : navigate('/login');
       }
     } catch (error) {
       showErrorToast(error.response.data.message || "Something went wrong!");

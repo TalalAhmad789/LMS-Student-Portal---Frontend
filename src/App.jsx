@@ -6,8 +6,6 @@ import Sidebar from "./components/Sidebar";
 import Footer from "./components/Footer";
 import axios from "axios";
 
-// color thme: #ba7a4e
-
 function App() {
   const route = useLocation();
   const navigate = useNavigate();
@@ -19,8 +17,8 @@ function App() {
   const isTeacherRoute = route.pathname.startsWith("/teacher");
   const isAdminRoute = route.pathname.startsWith("/admin");
   const isLoginPage = route.pathname === "/login";
-  const isTeacherLoginPage = route.pathname === "/teacher-fe7$nf!fd7/login"
-  const isAdminLoginPage = route.pathname === "/admin-bh$d!f74d4/login"
+  const isTeacherLoginPage = route.pathname === "/t-fe7$nf!fd7/login"
+  const isAdminLoginPage = route.pathname === "/a-bh$d!f74d4/login"
 
   useEffect(() => {
     const checkSession = async () => {
@@ -44,10 +42,10 @@ function App() {
             setTeacherInfo(res.data.data.teacher)
           }
           else {
-            navigate("/login")
+            navigate("/t-fe7$nf!fd7/login")
           }
         } catch (error) {
-          navigate("/login")
+          navigate("/t-fe7$nf!fd7/login")
         }
       }
 
@@ -58,10 +56,10 @@ function App() {
             setAdminInfo(res.data.data.admin)
           }
           else {
-            navigate("/login")
+            navigate("/a-bh$d!f74d4/login")
           }
         } catch (error) {
-          navigate("/login")
+          navigate("/a-bh$d!f74d4/login")
         }
       }
     };
